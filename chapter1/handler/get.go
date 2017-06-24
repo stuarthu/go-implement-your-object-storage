@@ -8,6 +8,7 @@ import (
 
 func Get(w http.ResponseWriter, r *http.Request) {
 	f, e := os.Open("/tmp" + r.URL.String())
+	defer f.Close()
 	if e != nil {
 		w.WriteHeader(http.StatusNotFound)
 	}
