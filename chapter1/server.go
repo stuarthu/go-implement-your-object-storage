@@ -1,24 +1,25 @@
 package main
 
 import (
-	. "./handler"
+	"./objects"
+	"log"
 	"net/http"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func objectsHandler(w http.ResponseWriter, r *http.Request) {
 	m := r.Method
 	if m == http.MethodPut {
-		Put(w, r)
+		objects.Put(w, r)
 		return
 	}
 	if m == http.MethodGet {
-		Get(w, r)
+		objects.Get(w, r)
 		return
 	}
 	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
 func main() {
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(":12345", nil)
+	http.HandleFunc("/", objectsHandler)
+	log.Fatal(http.ListenAndServe(":12345", nil))
 }
