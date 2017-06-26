@@ -10,10 +10,10 @@ import (
 
 func Get(w http.ResponseWriter, r *http.Request) {
 	f, e := os.Open("/tmp/" + strings.Split(r.URL.Path, "/")[2])
-	defer f.Close()
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusNotFound)
 	}
+	defer f.Close()
 	io.Copy(w, f)
 }
