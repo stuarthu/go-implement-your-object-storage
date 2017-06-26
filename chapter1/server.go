@@ -20,6 +20,6 @@ func objectsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", objectsHandler)
+	http.HandleFunc("/objects/", objectsHandler)
 	log.Fatal(http.ListenAndServe(":12345", nil))
 }
