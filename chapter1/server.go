@@ -6,20 +6,7 @@ import (
 	"net/http"
 )
 
-func objectsHandler(w http.ResponseWriter, r *http.Request) {
-	m := r.Method
-	if m == http.MethodPut {
-		objects.Put(w, r)
-		return
-	}
-	if m == http.MethodGet {
-		objects.Get(w, r)
-		return
-	}
-	w.WriteHeader(http.StatusMethodNotAllowed)
-}
-
 func main() {
-	http.HandleFunc("/objects/", objectsHandler)
+	http.HandleFunc("/objects/", objects.Handler)
 	log.Fatal(http.ListenAndServe(":12345", nil))
 }
