@@ -5,11 +5,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-type Queue interface {
-	Publish(replyTo string, body interface{})
-	Consume() <-chan amqp.Delivery
-}
-
 type RabbitMQ struct {
 	channel  *amqp.Channel
 	Name     string
@@ -89,6 +84,18 @@ func (q *RabbitMQ) Send(queue string, body interface{}) {
 }
 
 func (q *RabbitMQ) Publish(exchange string, body interface{}) {
+	e := q.channel.ExchangeDeclare(
+		exchange,
+		"fanout",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if e != nil {
+		panic(e)
+	}
 	str, e := json.Marshal(body)
 	if e != nil {
 		panic(e)

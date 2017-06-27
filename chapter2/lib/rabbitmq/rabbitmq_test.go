@@ -5,25 +5,23 @@ import (
 	"testing"
 )
 
+const host = "amqp://test:test@10.29.102.173:5672"
+
 func TestPublish(t *testing.T) {
-	q := New("amqp://localhost:5672")
+	q := New(host)
 	defer q.Close()
 	q.Bind("test")
 
-	q2 := New("amqp://localhost:5672")
+	q2 := New(host)
 	defer q2.Close()
 	q2.Bind("test")
 
-	q3 := New("amqp://localhost:5672")
+	q3 := New(host)
 	defer q3.Close()
-	q3.Bind("test2")
-
-	q4 := New("amqp://localhost:5672")
-	defer q4.Close()
 
 	expect := "test"
-	q4.Publish("test2", "any")
-	q4.Publish("test", expect)
+	q3.Publish("test2", "any")
+	q3.Publish("test", expect)
 
 	c := q.Consume()
 	msg := <-c
@@ -35,7 +33,7 @@ func TestPublish(t *testing.T) {
 	if actual != expect {
 		t.Errorf("expected %s, actual %s", expect, actual)
 	}
-	if msg.ReplyTo != q4.Name {
+	if msg.ReplyTo != q3.Name {
 		t.Error(msg)
 	}
 
@@ -48,11 +46,11 @@ func TestPublish(t *testing.T) {
 	if actual != expect {
 		t.Errorf("expected %s, actual %s", expect, actual)
 	}
-	if msg.ReplyTo != q4.Name {
+	if msg.ReplyTo != q3.Name {
 		t.Error(msg)
 	}
 	q2.Send(msg.ReplyTo, "test3")
-	c3 := q4.Consume()
+	c3 := q3.Consume()
 	msg = <-c3
 	if string(msg.Body) != `"test3"` {
 		t.Error(string(msg.Body))
@@ -60,10 +58,10 @@ func TestPublish(t *testing.T) {
 }
 
 func TestSend(t *testing.T) {
-	q := New("amqp://localhost:5672")
+	q := New(host)
 	defer q.Close()
 
-	q2 := New("amqp://localhost:5672")
+	q2 := New(host)
 	defer q2.Close()
 
 	expect := "test"
