@@ -1,11 +1,9 @@
 package locate
 
 import (
-	"../../lib/cfg"
 	"../../lib/rabbitmq"
-	"encoding/json"
-	"fmt"
 	"os"
+	"strconv"
 )
 
 func locate(name string) bool {
@@ -14,21 +12,17 @@ func locate(name string) bool {
 }
 
 func StartLocate() {
-	q := rabbitmq.New(cfg.Config.RabbitMQServer)
+	q := rabbitmq.New(os.Getenv("RABBITMQ_SERVER"))
 	defer q.Close()
-	q.Bind("locate")
+	q.Bind("dataServers")
 	c := q.Consume()
-	var body interface{}
 	for msg := range c {
-		e := json.Unmarshal(msg.Body, &body)
+		n, e := strconv.Unquote(string(msg.Body))
 		if e != nil {
 			panic(e)
 		}
-		if locate(cfg.Config.StorageRoot + "/" + body.(string)) {
-			fmt.Println(body, "exist, reply", cfg.Config.ListenAddress)
-			q.Send(msg.ReplyTo, cfg.Config.ListenAddress)
-		} else {
-			fmt.Println(body, "not exist, reply to", msg.ReplyTo)
+		if locate(os.Getenv("STORAGE_ROOT") + "/" + n) {
+			q.Send(msg.ReplyTo, os.Getenv("LISTEN_ADDRESS"))
 		}
 	}
 }

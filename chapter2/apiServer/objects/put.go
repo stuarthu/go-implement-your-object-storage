@@ -1,17 +1,31 @@
 package objects
 
 import (
+	"../heartbeat"
 	"io"
+	"log"
 	"net/http"
-	"os"
 )
 
 func Put(w http.ResponseWriter, r *http.Request) {
-	f, e := os.Create("/tmp" + r.URL.String())
-	defer f.Close()
-	if e != nil {
+	s := heartbeat.ChooseRandomDataServer()
+	if s == "" {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	io.Copy(f, r.Body)
+	request, e := http.NewRequest("PUT", "http://"+s+r.URL.Path, r.Body)
+	if e != nil {
+		log.Println(e)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	client := http.Client{}
+	nr, e := client.Do(request)
+	if e != nil {
+		log.Println(e)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(nr.StatusCode)
+	io.Copy(w, nr.Body)
 }

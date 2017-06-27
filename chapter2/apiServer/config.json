@@ -1,5 +1,0 @@
-{
-  "ListenAddress": ":12345",
-  "StorageRoot": "/tmp",
-  "RabbitMQServer": "amqp://localhost:5672"
-}

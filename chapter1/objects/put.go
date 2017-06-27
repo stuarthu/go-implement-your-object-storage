@@ -9,7 +9,7 @@ import (
 )
 
 func Put(w http.ResponseWriter, r *http.Request) {
-	f, e := os.Create("/tmp/" + strings.Split(r.URL.Path, "/")[2])
+	f, e := os.Create(os.Getenv("STORAGE_ROOT") + "/" + strings.Split(r.URL.Path, "/")[2])
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
