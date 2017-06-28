@@ -41,19 +41,7 @@ func New(s string) *RabbitMQ {
 }
 
 func (q *RabbitMQ) Bind(e string) {
-	er := q.channel.ExchangeDeclare(
-		e,
-		"fanout",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if er != nil {
-		panic(er)
-	}
-	er = q.channel.QueueBind(
+	er := q.channel.QueueBind(
 		q.Name, // queue name
 		"",     // routing key
 		e,      // exchange
@@ -84,18 +72,6 @@ func (q *RabbitMQ) Send(queue string, body interface{}) {
 }
 
 func (q *RabbitMQ) Publish(exchange string, body interface{}) {
-	e := q.channel.ExchangeDeclare(
-		exchange,
-		"fanout",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if e != nil {
-		panic(e)
-	}
 	str, e := json.Marshal(body)
 	if e != nil {
 		panic(e)
