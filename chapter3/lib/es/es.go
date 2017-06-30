@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -23,6 +22,28 @@ type searchResult struct {
 		Total int
 		Hits  []hit
 	}
+}
+
+func GetHash(name string, version int) (string, error) {
+	client := http.Client{}
+	request, _ := http.NewRequest("GET", "http://"+os.Getenv("ES_SERVER")+
+		fmt.Sprintf("http://%s/metadata/objects/%s_%d/_source?_source_include=hash", os.Getenv("ES_SERVER"), name, version), nil)
+	r, e := client.Do(request)
+	if e != nil {
+		return "", e
+	}
+	if r.StatusCode != http.StatusOK {
+		e = fmt.Errorf("fail to get %s_%d: %d", name, version, r.StatusCode)
+		return "", e
+	}
+	result, _ := ioutil.ReadAll(r.Body)
+	var sr searchResult
+	fmt.Println(result)
+	e = json.Unmarshal(result, &sr)
+	if e != nil {
+		return "", e
+	}
+	return "", nil
 }
 
 func SearchLatestVersion(name string) (version int, hash string, e error) {
@@ -73,7 +94,7 @@ func PutVersion(name string, version, size int, hash string) error {
 	return nil
 }
 
-func SearchVersions(w http.ResponseWriter, object string) {
+func SearchVersions(object string) (int, io.Reader, error) {
 	client := http.Client{}
 	url := "http://" + os.Getenv("ES_SERVER") + "/metadata/objects/_search"
 	if object != "" {
@@ -82,10 +103,7 @@ func SearchVersions(w http.ResponseWriter, object string) {
 	request, _ := http.NewRequest("GET", url, nil)
 	r, e := client.Do(request)
 	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return 0, nil, e
 	}
-	w.WriteHeader(r.StatusCode)
-	io.Copy(w, r.Body)
+	return r.StatusCode, r.Body, nil
 }
