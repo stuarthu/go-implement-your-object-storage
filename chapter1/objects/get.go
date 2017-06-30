@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Get(w http.ResponseWriter, r *http.Request) {
+func get(w http.ResponseWriter, r *http.Request) {
 	f, e := os.Open(os.Getenv("STORAGE_ROOT") + "/" + strings.Split(r.URL.Path, "/")[2])
 	if e != nil {
 		log.Println(e)

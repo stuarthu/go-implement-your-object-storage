@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Get(w http.ResponseWriter, r *http.Request) {
+func get(w http.ResponseWriter, r *http.Request) {
 	s := locate.Locate(strings.Split(r.URL.Path, "/")[2])
 	if s == "" {
 		w.WriteHeader(http.StatusNotFound)

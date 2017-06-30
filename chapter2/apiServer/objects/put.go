@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func Put(w http.ResponseWriter, r *http.Request) {
+func put(w http.ResponseWriter, r *http.Request) {
 	s := heartbeat.ChooseRandomDataServer()
 	if s == "" {
 		w.WriteHeader(http.StatusInternalServerError)
