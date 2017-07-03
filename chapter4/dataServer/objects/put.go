@@ -40,15 +40,14 @@ func put(w http.ResponseWriter, r *http.Request) {
 	reader := io.TeeReader(r.Body, f)
 	h := sha256.New()
 	io.Copy(h, reader)
+	f.Close()
 	digest := base64.StdEncoding.EncodeToString(h.Sum(nil))
 	if digest != hash {
-		f.Close()
 		os.Remove(tmpname)
 		log.Println("calculated digest=" + digest + ",requested object=" + hash)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	f.Close()
 	os.Rename(tmpname, filename)
 }

@@ -12,31 +12,8 @@ import (
 	"strings"
 )
 
-type searchResult struct {
-	Hits struct {
-		Total int
-	}
-}
-
-func put(w http.ResponseWriter, r *http.Request) {
-	digest := r.Header.Get("digest")
-	if len(digest) < 9 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if digest[:8] != "SHA-256=" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	hash := digest[8:]
-
-	object := url.PathEscape(hash)
-	s := locate.Locate(object)
-	if s != "" {
-		return
-	}
-
-	s = heartbeat.ChooseRandomDataServer()
+func storeData(w http.ResponseWriter, r *http.Request, object string) {
+	s := heartbeat.ChooseRandomDataServer()
 	if s == "" {
 		log.Println("cannot find any dataServer")
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -58,6 +35,25 @@ func put(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(nr.StatusCode)
 	io.Copy(w, nr.Body)
+}
+
+func put(w http.ResponseWriter, r *http.Request) {
+	digest := r.Header.Get("digest")
+	if len(digest) < 9 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if digest[:8] != "SHA-256=" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	hash := digest[8:]
+
+	object := url.PathEscape(hash)
+	s := locate.Locate(object)
+	if s == "" {
+		storeData(w, r, object)
+	}
 
 	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 	version, _, e := es.SearchLatestVersion(name)
