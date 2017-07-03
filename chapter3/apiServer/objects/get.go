@@ -6,15 +6,15 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
 
 func get(w http.ResponseWriter, r *http.Request) {
-	name := strings.Split(r.URL.Path, "/")[2]
+	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 	version := r.URL.Query()["version"]
 	var hash string
-	log.Println(version)
 	if len(version) == 0 {
 		_, hash, _ = es.SearchLatestVersion(name)
 	} else {
@@ -29,13 +29,13 @@ func get(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	log.Println(hash)
-	s := locate.Locate(hash)
+	object := url.PathEscape(hash)
+	s := locate.Locate(object)
 	if s == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	request, e := http.NewRequest("GET", "http://"+s+"/objects/"+hash, r.Body)
+	request, e := http.NewRequest("GET", "http://"+s+"/objects/"+object, r.Body)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)

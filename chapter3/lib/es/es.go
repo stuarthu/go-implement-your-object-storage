@@ -10,11 +10,13 @@ import (
 	"strings"
 )
 
+type source struct {
+	Version int
+	Hash    string
+}
+
 type hit struct {
-	Source struct {
-		Version int
-		Hash    string
-	} `json:"_source"`
+	Source source `json:"_source"`
 }
 
 type searchResult struct {
@@ -26,8 +28,9 @@ type searchResult struct {
 
 func GetHash(name string, version int) (string, error) {
 	client := http.Client{}
-	request, _ := http.NewRequest("GET", "http://"+os.Getenv("ES_SERVER")+
-		fmt.Sprintf("http://%s/metadata/objects/%s_%d/_source?_source_include=hash", os.Getenv("ES_SERVER"), name, version), nil)
+	request, _ := http.NewRequest("GET",
+		fmt.Sprintf("http://%s/metadata/objects/%s_%d/_source?_source_include=hash",
+			os.Getenv("ES_SERVER"), name, version), nil)
 	r, e := client.Do(request)
 	if e != nil {
 		return "", e
@@ -37,13 +40,12 @@ func GetHash(name string, version int) (string, error) {
 		return "", e
 	}
 	result, _ := ioutil.ReadAll(r.Body)
-	var sr searchResult
-	fmt.Println(result)
-	e = json.Unmarshal(result, &sr)
+	var s source
+	e = json.Unmarshal(result, &s)
 	if e != nil {
 		return "", e
 	}
-	return "", nil
+	return s.Hash, nil
 }
 
 func SearchLatestVersion(name string) (version int, hash string, e error) {
@@ -75,10 +77,12 @@ func SearchLatestVersion(name string) (version int, hash string, e error) {
 }
 
 func PutVersion(name string, version, size int, hash string) error {
-	doc := fmt.Sprintf(`{"name":"%s","version":%d,"size":%d,"hash":"%s"}`, name, version, size, hash)
+	doc := fmt.Sprintf(`{"name":"%s","version":%d,"size":%d,"hash":"%s"}`,
+		name, version, size, hash)
 	client := http.Client{}
 	request, _ := http.NewRequest("PUT",
-		fmt.Sprintf("http://%s/metadata/objects/%s_%d?op_type=create", os.Getenv("ES_SERVER"), name, version),
+		fmt.Sprintf("http://%s/metadata/objects/%s_%d?op_type=create",
+			os.Getenv("ES_SERVER"), name, version),
 		strings.NewReader(doc))
 	r, e := client.Do(request)
 	if e != nil {
@@ -94,11 +98,11 @@ func PutVersion(name string, version, size int, hash string) error {
 	return nil
 }
 
-func SearchVersions(object string) (int, io.Reader, error) {
+func SearchVersions(name string) (int, io.Reader, error) {
 	client := http.Client{}
 	url := "http://" + os.Getenv("ES_SERVER") + "/metadata/objects/_search"
-	if object != "" {
-		url += "?q=name:" + object
+	if name != "" {
+		url += "?q=name:" + name
 	}
 	request, _ := http.NewRequest("GET", url, nil)
 	r, e := client.Do(request)

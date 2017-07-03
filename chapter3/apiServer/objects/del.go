@@ -8,7 +8,7 @@ import (
 )
 
 func del(w http.ResponseWriter, r *http.Request) {
-	name := strings.Split(r.URL.Path, "/")[2]
+	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 	version, _, e := es.SearchLatestVersion(name)
 	if e != nil {
 		log.Println(e)

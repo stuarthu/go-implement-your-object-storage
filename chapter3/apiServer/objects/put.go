@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -17,21 +18,6 @@ type searchResult struct {
 }
 
 func put(w http.ResponseWriter, r *http.Request) {
-	name := strings.Split(r.URL.Path, "/")[2]
-	version, _, e := es.SearchLatestVersion(name)
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	version += 1
-	size, e := strconv.Atoi(r.Header.Get("content-length"))
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	digest := r.Header.Get("digest")
 	if len(digest) < 9 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -42,12 +28,6 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	hash := digest[8:]
-	e = es.PutVersion(name, version, size, hash)
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
 	s := heartbeat.ChooseRandomDataServer()
 	if s == "" {
@@ -55,7 +35,8 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	request, e := http.NewRequest("PUT", "http://"+s+"/objects/"+hash, r.Body)
+	object := url.PathEscape(hash)
+	request, e := http.NewRequest("PUT", "http://"+s+"/objects/"+object, r.Body)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -70,4 +51,25 @@ func put(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(nr.StatusCode)
 	io.Copy(w, nr.Body)
+
+	name := strings.Split(r.URL.EscapedPath(), "/")[2]
+	version, _, e := es.SearchLatestVersion(name)
+	if e != nil {
+		log.Println(e)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	version += 1
+	size, e := strconv.Atoi(r.Header.Get("content-length"))
+	if e != nil {
+		log.Println(e)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	e = es.PutVersion(name, version, size, hash)
+	if e != nil {
+		log.Println(e)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

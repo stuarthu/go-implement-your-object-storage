@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func put(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +14,8 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	request, e := http.NewRequest("PUT", "http://"+s+r.URL.Path, r.Body)
+	object := strings.Split(r.URL.EscapedPath(), "/")[2]
+	request, e := http.NewRequest("PUT", "http://"+s+"/objects/"+object, r.Body)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)

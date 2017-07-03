@@ -14,7 +14,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	code, body, e := es.SearchVersions(strings.Split(r.URL.Path, "/")[2])
+	code, body, e := es.SearchVersions(strings.Split(r.URL.EscapedPath(), "/")[2])
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -34,7 +34,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	s := Locate(strings.Split(r.URL.Path, "/")[2])
+	s := Locate(strings.Split(r.URL.EscapedPath(), "/")[2])
 	if s != "" {
 		w.Write([]byte(s))
 	} else {

@@ -9,12 +9,13 @@ import (
 )
 
 func get(w http.ResponseWriter, r *http.Request) {
-	s := locate.Locate(strings.Split(r.URL.Path, "/")[2])
+	object := strings.Split(r.URL.EscapedPath(), "/")[2]
+	s := locate.Locate(object)
 	if s == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	request, e := http.NewRequest("GET", "http://"+s+r.URL.Path, r.Body)
+	request, e := http.NewRequest("GET", "http://"+s+"/objects/"+object, r.Body)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
