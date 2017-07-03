@@ -11,7 +11,7 @@ import (
 func put(w http.ResponseWriter, r *http.Request) {
 	s := heartbeat.ChooseRandomDataServer()
 	if s == "" {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
 	object := strings.Split(r.URL.EscapedPath(), "/")[2]

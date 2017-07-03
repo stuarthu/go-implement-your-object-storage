@@ -3,6 +3,7 @@ package objects
 import (
 	"../../lib/es"
 	"../heartbeat"
+	"../locate"
 	"io"
 	"log"
 	"net/http"
@@ -29,13 +30,19 @@ func put(w http.ResponseWriter, r *http.Request) {
 	}
 	hash := digest[8:]
 
-	s := heartbeat.ChooseRandomDataServer()
+	object := url.PathEscape(hash)
+	s := locate.Locate(object)
+	if s != "" {
+		return
+	}
+
+	s = heartbeat.ChooseRandomDataServer()
 	if s == "" {
 		log.Println("cannot find any dataServer")
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
-	object := url.PathEscape(hash)
+
 	request, e := http.NewRequest("PUT", "http://"+s+"/objects/"+object, r.Body)
 	if e != nil {
 		log.Println(e)

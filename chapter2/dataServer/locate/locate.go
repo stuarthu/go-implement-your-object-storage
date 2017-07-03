@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func locate(name string) bool {
+func Locate(name string) bool {
 	_, err := os.Stat(name)
 	return !os.IsNotExist(err)
 }
@@ -21,7 +21,7 @@ func StartLocate() {
 		if e != nil {
 			panic(e)
 		}
-		if locate(os.Getenv("STORAGE_ROOT") + "/" + n) {
+		if Locate(os.Getenv("STORAGE_ROOT") + "/" + n) {
 			q.Send(msg.ReplyTo, os.Getenv("LISTEN_ADDRESS"))
 		}
 	}
