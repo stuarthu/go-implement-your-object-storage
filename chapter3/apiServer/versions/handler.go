@@ -2,6 +2,7 @@ package versions
 
 import (
 	"../../lib/es"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -21,5 +22,26 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(code)
-	io.Copy(w, body)
+	dec := json.NewDecoder(body)
+	enc := json.NewEncoder(w)
+	for {
+		t, e := dec.Token()
+		if e != nil {
+			if e != io.EOF {
+				log.Println(e)
+			}
+			return
+		}
+		if t == "_source" {
+			var m es.Metadata
+			e = dec.Decode(&m)
+			if e != nil {
+				log.Println(e)
+			}
+			e = enc.Encode(&m)
+			if e != nil {
+				log.Println(e)
+			}
+		}
+	}
 }

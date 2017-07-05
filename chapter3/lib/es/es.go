@@ -10,13 +10,15 @@ import (
 	"strings"
 )
 
-type source struct {
+type Metadata struct {
+	Name    string
 	Version int
+	Size    int
 	Hash    string
 }
 
 type hit struct {
-	Source source `json:"_source"`
+	Source Metadata `json:"_source"`
 }
 
 type searchResult struct {
@@ -40,7 +42,7 @@ func GetHash(name string, version int) (string, error) {
 		return "", e
 	}
 	result, _ := ioutil.ReadAll(r.Body)
-	var s source
+	var s Metadata
 	e = json.Unmarshal(result, &s)
 	if e != nil {
 		return "", e
