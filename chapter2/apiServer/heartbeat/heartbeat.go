@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var DataServers = make(map[string]time.Time)
+var dataServers = make(map[string]time.Time)
 var mutex sync.Mutex
 
 func ListenHeartbeat() {
@@ -23,24 +23,24 @@ func ListenHeartbeat() {
 			panic(e)
 		}
 		mutex.Lock()
-		DataServers[dataServer] = time.Now()
+		dataServers[dataServer] = time.Now()
 		mutex.Unlock()
 	}
 }
 
 func ChooseRandomDataServer() string {
-	n := len(DataServers)
+	n := len(dataServers)
 	if n == 0 {
 		return ""
 	}
 	i := rand.Intn(n)
-	for s, t := range DataServers {
+	for s, t := range dataServers {
 		if i == 0 {
 			if t.Add(30 * time.Second).After(time.Now()) {
 				return s
 			}
 			mutex.Lock()
-			delete(DataServers, s)
+			delete(dataServers, s)
 			mutex.Unlock()
 			return ChooseRandomDataServer()
 		}

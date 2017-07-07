@@ -13,7 +13,7 @@ import (
 type Metadata struct {
 	Name    string
 	Version int
-	Size    int
+	Size    int64
 	Hash    string
 }
 
@@ -78,7 +78,7 @@ func SearchLatestVersion(name string) (version int, hash string, e error) {
 	return
 }
 
-func PutVersion(name string, version, size int, hash string) error {
+func PutVersion(name string, version int, size int64, hash string) error {
 	doc := fmt.Sprintf(`{"name":"%s","version":%d,"size":%d,"hash":"%s"}`,
 		name, version, size, hash)
 	client := http.Client{}

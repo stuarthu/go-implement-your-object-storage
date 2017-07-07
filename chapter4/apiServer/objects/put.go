@@ -63,7 +63,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	version += 1
-	size, e := strconv.Atoi(r.Header.Get("content-length"))
+	size, e := strconv.ParseInt(r.Header.Get("content-length"), 0, 64)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusBadRequest)
