@@ -49,15 +49,10 @@ func StartLocate() {
 }
 
 func CollectObjects() {
-	files, e := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/*:?")
+	files, e := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/*")
 	fmt.Println(files, e)
 	for i := range files {
-		file := filepath.Base(files[i])
-		object := file[:len(file)-2]
-		id, e := strconv.Atoi(file[len(file)-1:])
-		if e != nil {
-			panic(e)
-		}
-		objects[object] = id
+		object := filepath.Base(files[i])
+		objects[object] = 1
 	}
 }

@@ -14,12 +14,12 @@ import (
 )
 
 func put(w http.ResponseWriter, r *http.Request) {
-    log.Println(r.URL.EscapedPath())
+	log.Println(r.URL.EscapedPath())
 	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 	filename := os.Getenv("STORAGE_ROOT") + "/" + name
-//	if locate.Locate(filename) {
-//		return
-//	}
+	//	if locate.Locate(filename) {
+	//		return
+	//	}
 
 	hash, e := url.PathUnescape(name)
 	if e != nil {
@@ -44,10 +44,10 @@ func put(w http.ResponseWriter, r *http.Request) {
 	f.Close()
 	digest := base64.StdEncoding.EncodeToString(h.Sum(nil))
 	if digest != hash {
-//		os.Remove(tmpname)
+		//		os.Remove(tmpname)
 		log.Println("calculated digest=" + digest + ",requested object=" + hash)
-//		w.WriteHeader(http.StatusForbidden)
-//		return
+		//		w.WriteHeader(http.StatusForbidden)
+		//		return
 	}
 
 	os.Rename(tmpname, filename)

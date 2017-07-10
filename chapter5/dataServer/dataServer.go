@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-    locate.CollectObjects()
+	locate.CollectObjects()
 	go heartbeat.StartHeartbeat()
 	go locate.StartLocate()
 	http.HandleFunc("/objects/", objects.Handler)

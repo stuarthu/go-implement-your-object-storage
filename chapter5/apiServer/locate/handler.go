@@ -3,17 +3,17 @@ package locate
 import (
 	"../../lib/rabbitmq"
 	"../../lib/rs"
+	"encoding/json"
 	"net/http"
 	"os"
 	"strings"
 	"time"
-    "encoding/json"
 )
 
 type locateMessage struct {
-          Addr string
-           Id int
-        }
+	Addr string
+	Id   int
+}
 
 func Locate(name string) (locateInfo []locateMessage) {
 	q := rabbitmq.New(os.Getenv("RABBITMQ_SERVER"))
@@ -28,8 +28,8 @@ func Locate(name string) (locateInfo []locateMessage) {
 		if len(msg.Body) == 0 {
 			return
 		}
-        var info locateMessage
-        json.Unmarshal(msg.Body, &info)
+		var info locateMessage
+		json.Unmarshal(msg.Body, &info)
 		locateInfo = append(locateInfo, info)
 	}
 	return
@@ -44,11 +44,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	info := Locate(strings.Split(r.URL.EscapedPath(), "/")[2])
 	if len(info) == 0 {
 		w.WriteHeader(http.StatusNotFound)
-        return
-    }
-    for i := range info {
-        b, _ := json.Marshal(info[i])
-        w.Write(b)
+		return
+	}
+	for i := range info {
+		b, _ := json.Marshal(info[i])
+		w.Write(b)
 		w.Write([]byte("\n"))
-    }
+	}
 }

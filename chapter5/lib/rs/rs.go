@@ -37,7 +37,7 @@ func Put(data io.Reader, dataServers []string, object string, size int64) error 
 	for index := range readers {
 		go func(i int) {
 			defer wg.Done()
-            url := fmt.Sprintf("http://%s/objects/%s:%d", dataServers[i], object, i)
+			url := fmt.Sprintf("http://%s/objects/%s:%d", dataServers[i], object, i)
 			request, e := http.NewRequest("PUT", url, readers[i])
 			if e != nil {
 				fmt.Println(e)
@@ -79,7 +79,7 @@ func Put(data io.Reader, dataServers []string, object string, size int64) error 
 	for index := range parityReaders {
 		go func(i int) {
 			defer wg.Done()
-            url := fmt.Sprintf("http://%s/objects/%s:%d", dataServers[DATA_SHARDS+i], object, DATA_SHARDS+i)
+			url := fmt.Sprintf("http://%s/objects/%s:%d", dataServers[DATA_SHARDS+i], object, DATA_SHARDS+i)
 			request, e := http.NewRequest("PUT", url, parityReaders[i])
 			if e != nil {
 				return

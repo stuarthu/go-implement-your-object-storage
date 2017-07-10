@@ -2,6 +2,7 @@ package objects
 
 import (
 	"../../lib/es"
+	"../../lib/httpstream"
 	"../locate"
 	"io"
 	"log"
@@ -35,19 +36,11 @@ func get(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	request, e := http.NewRequest("GET", "http://"+s+"/objects/"+object, r.Body)
+	stream, e := httpstream.NewGetStream("http://" + s + "/objects/" + object)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	client := http.Client{}
-	nr, e := client.Do(request)
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(nr.StatusCode)
-	io.Copy(w, nr.Body)
+	io.Copy(w, stream)
 }

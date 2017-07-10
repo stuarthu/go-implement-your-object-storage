@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"../../lib/httpstream"
 	"../heartbeat"
 	"io"
 	"log"
@@ -15,19 +16,11 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	object := strings.Split(r.URL.EscapedPath(), "/")[2]
-	request, e := http.NewRequest("PUT", "http://"+s+"/objects/"+object, r.Body)
+	stream := httpstream.NewPutStream("http://" + s + "/objects/" + object)
+	io.Copy(stream, r.Body)
+	e := stream.Close()
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
-	client := http.Client{}
-	nr, e := client.Do(request)
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(nr.StatusCode)
-	io.Copy(w, nr.Body)
 }
