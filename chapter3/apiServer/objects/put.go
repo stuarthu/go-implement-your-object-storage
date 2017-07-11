@@ -25,3 +25,13 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
+
+func storeObject(r *http.Request, hash string) error {
+	s := heartbeat.ChooseRandomDataServer()
+	if s == "" {
+		return fmt.Errorf("cannot find any dataServer")
+	}
+	stream := httpstream.NewPutStream("http://" + s + "/objects/" + hash)
+	io.Copy(stream, r.Body)
+	return stream.Close()
+}

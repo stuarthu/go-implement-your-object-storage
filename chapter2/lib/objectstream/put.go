@@ -19,7 +19,7 @@ func NewPutStream(server, object string) *PutStream {
 	go func() {
 		r, e := client.Do(request)
 		if e == nil && r.StatusCode != http.StatusOK {
-			e = fmt.Errorf("http code %d", r.StatusCode)
+			e = fmt.Errorf("dataServer return http code %d", r.StatusCode)
 		}
 		c <- e
 	}()

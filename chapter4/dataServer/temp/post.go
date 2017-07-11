@@ -12,7 +12,7 @@ import (
 func post(w http.ResponseWriter, r *http.Request) {
 	output, _ := exec.Command("uuidgen").Output()
 	uuid := strings.TrimSuffix(string(output), "\n")
-	f, e := os.Create(os.Getenv("TMP_ROOT") + "/" + uuid)
+	f, e := os.Create(os.Getenv("STORAGE_ROOT") + "/temp/" + uuid)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)

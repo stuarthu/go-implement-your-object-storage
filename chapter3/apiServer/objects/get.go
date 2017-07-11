@@ -2,7 +2,7 @@ package objects
 
 import (
 	"../../lib/es"
-	"../../lib/httpstream"
+	"../../lib/objectstream"
 	"../locate"
 	"io"
 	"log"
@@ -31,12 +31,12 @@ func get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	object := url.PathEscape(hash)
-	s := locate.Locate(object)
-	if s == "" {
+	info := locate.Locate(object)
+	if len(info) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	stream, e := httpstream.NewGetStream("http://" + s + "/objects/" + object)
+	stream, e := objectstream.NewGetStream(info[0].Addr, object)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)

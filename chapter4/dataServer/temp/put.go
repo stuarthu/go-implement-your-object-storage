@@ -1,6 +1,7 @@
 package temp
 
 import (
+	"../locate"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 
 func put(w http.ResponseWriter, r *http.Request) {
 	uuid := strings.Split(r.URL.EscapedPath(), "/")[2]
-	infoFile := os.Getenv("TMP_ROOT") + "/" + uuid
+	infoFile := os.Getenv("STORAGE_ROOT") + "/temp/" + uuid
 	b, e := ioutil.ReadFile(infoFile)
 	if e != nil {
 		log.Println(e)
@@ -19,13 +20,13 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	datFile := infoFile + ".dat"
-	f, e := os.OpenFile(datFile, os.O_WRONLY|os.O_APPEND, 0600)
+	f, e := os.OpenFile(datFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	f.Close()
+	defer f.Close()
 	info, e := f.Stat()
 	if e != nil {
 		log.Println(e)
@@ -42,5 +43,6 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	os.Rename(datFile, os.Getenv("STORAGE_ROOT")+"/"+i[0])
+	locate.Add(i[0], 1)
+	os.Rename(datFile, os.Getenv("STORAGE_ROOT")+"/objects/"+i[0])
 }

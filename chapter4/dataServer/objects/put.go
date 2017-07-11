@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"../locate"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -10,7 +11,7 @@ import (
 func put(w http.ResponseWriter, r *http.Request) {
 	object := strings.Split(r.URL.EscapedPath(), "/")[2]
 
-	files, _ := filepath.Glob(os.Getenv("TMP_ROOT") + "/" + object + ":*")
+	files, _ := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/temp/" + object + ":*")
 	if len(files) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -19,5 +20,6 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
-	os.Rename(files[0], os.Getenv("STORAGE_ROOT")+"/"+object)
+	locate.Add(object, 1)
+	os.Rename(files[0], os.Getenv("STORAGE_ROOT")+"/objects/"+object)
 }

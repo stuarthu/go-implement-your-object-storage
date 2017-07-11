@@ -7,12 +7,12 @@ import (
 	"strings"
 )
 
-type TempStream struct {
+type TempPutStream struct {
 	server string
 	uuid   string
 }
 
-func NewTempStream(server, object string, size int64) *TempStream {
+func NewTempPutStream(server, object string, size int64) (*TempPutStream, error) {
 	request, e := http.NewRequest("POST", "http://"+server+"/temp/"+object, nil)
 	if e != nil {
 		panic(e)
@@ -21,16 +21,16 @@ func NewTempStream(server, object string, size int64) *TempStream {
 	client := http.Client{}
 	response, e := client.Do(request)
 	if e != nil {
-		panic(e)
+		return nil, e
 	}
 	uuid, e := ioutil.ReadAll(response.Body)
 	if e != nil {
 		panic(e)
 	}
-	return &TempStream{server, string(uuid)}
+	return &TempPutStream{server, string(uuid)}, nil
 }
 
-func (w *TempStream) Write(p []byte) (n int, err error) {
+func (w *TempPutStream) Write(p []byte) (n int, err error) {
 	request, e := http.NewRequest("PATCH", "http://"+w.server+"/temp/"+w.uuid, strings.NewReader(string(p)))
 	if e != nil {
 		return 0, e
@@ -41,17 +41,22 @@ func (w *TempStream) Write(p []byte) (n int, err error) {
 		return 0, e
 	}
 	if r.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("http code %d", r.StatusCode)
+		return 0, fmt.Errorf("dataServer return http code %d", r.StatusCode)
 	}
 	return len(p), nil
 }
 
-func (w *TempStream) Close(good bool) {
+func (w *TempPutStream) Close(good bool) (int, error) {
 	method := "DELETE"
 	if good {
 		method = "PUT"
 	}
 	request, _ := http.NewRequest(method, "http://"+w.server+"/temp/"+w.uuid, nil)
 	client := http.Client{}
-	client.Do(request)
+	r, e := client.Do(request)
+	return r.StatusCode, e
+}
+
+func (w *TempPutStream) NewTempGetStream() (*GetStream, error) {
+	return newGetStream("http://" + w.server + "/temp/" + w.uuid)
 }

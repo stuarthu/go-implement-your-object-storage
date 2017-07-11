@@ -21,7 +21,7 @@ func StartLocate() {
 		if e != nil {
 			panic(e)
 		}
-		if Locate(os.Getenv("STORAGE_ROOT") + "/" + n) {
+		if Locate(os.Getenv("STORAGE_ROOT") + "/objects/" + n) {
 			q.Send(msg.ReplyTo, os.Getenv("LISTEN_ADDRESS"))
 		}
 	}

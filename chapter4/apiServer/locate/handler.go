@@ -2,9 +2,7 @@ package locate
 
 import (
 	"../../lib/rabbitmq"
-	"../../lib/rs"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -24,16 +22,13 @@ func Locate(name string) (locateInfo []locateMessage) {
 		time.Sleep(time.Second)
 		q.Close()
 	}()
-	for i := 0; i < rs.ALL_SHARDS; i++ {
-		msg := <-c
-		if len(msg.Body) == 0 {
-			return
-		}
-		var info locateMessage
-		fmt.Println(msg.Body)
-		json.Unmarshal(msg.Body, &info)
-		locateInfo = append(locateInfo, info)
+	msg := <-c
+	if len(msg.Body) == 0 {
+		return
 	}
+	var info locateMessage
+	json.Unmarshal(msg.Body, &info)
+	locateInfo = append(locateInfo, info)
 	return
 }
 

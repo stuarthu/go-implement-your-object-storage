@@ -2,7 +2,6 @@ package heartbeat
 
 import (
 	"../../lib/rabbitmq"
-	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -39,7 +38,6 @@ func ChooseRandomDataServers(s int) (ds []string) {
 			bad = append(bad, s)
 		}
 	}
-	log.Println(good, bad)
 	if len(good) < s {
 		return
 	}

@@ -1,70 +1,67 @@
 package objects
 
 import (
-	"../../lib/es"
 	"../../lib/rs"
 	"../heartbeat"
 	"../locate"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
-	"strings"
 )
 
-func storeData(w http.ResponseWriter, r *http.Request, object string, size int64) {
-	s := heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS)
-	if len(s) != rs.ALL_SHARDS {
-		log.Println("cannot find enough dataServer")
-		w.WriteHeader(http.StatusServiceUnavailable)
+func put(w http.ResponseWriter, r *http.Request) {
+	hash := getHashFromHeader(r)
+	if hash == "" {
+		log.Println("missing object hash in digest header")
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	log.Println("rs.Put", object, size)
-	e := rs.Put(r.Body, s, object, size)
+	info := locate.Locate(url.PathEscape(hash))
+	if len(info) == 0 {
+		c, e := storeObject(r)
+		if e != nil {
+			log.Println(e)
+			w.WriteHeader(c)
+			return
+		}
+		if c != http.StatusOK {
+			w.WriteHeader(c)
+			return
+		}
+	}
+
+	e := addVersion(r)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
-func put(w http.ResponseWriter, r *http.Request) {
-	digest := r.Header.Get("digest")
-	if len(digest) < 9 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+func storeObject(r *http.Request) (int, error) {
+	s := heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS)
+	if len(s) < rs.ALL_SHARDS {
+		return http.StatusServiceUnavailable, fmt.Errorf("cannot find enough dataServer")
 	}
-	if digest[:8] != "SHA-256=" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	hash := digest[8:]
-
-	size, e := strconv.ParseInt(r.Header.Get("content-length"), 0, 64)
+	hash := getHashFromHeader(r)
+	size := getSizeFromHeader(r)
+	h := sha256.New()
+	reader := io.TeeReader(r.Body, h)
+	stream, e := rs.NewRSPutStream(s, url.PathEscape(hash), size)
 	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return http.StatusInternalServerError, e
 	}
-
-	object := url.PathEscape(hash)
-	s := locate.Locate(object)
-	if len(s) == 0 {
-		storeData(w, r, object, size)
+	io.Copy(stream, reader)
+	stream.Close()
+	digest := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	if digest != hash {
+		stream.Submit(false)
+		return http.StatusBadRequest, fmt.Errorf("object hash mismatch, calculated=%s, requested=%s", digest, hash)
 	}
-
-	name := strings.Split(r.URL.EscapedPath(), "/")[2]
-	version, _, e := es.SearchLatestVersion(name)
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	version += 1
-	e = es.PutVersion(name, version, size, hash)
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	stream.Submit(true)
+	return http.StatusOK, nil
 }

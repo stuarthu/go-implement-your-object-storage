@@ -2,7 +2,6 @@ package locate
 
 import (
 	"../../lib/rabbitmq"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -21,7 +20,6 @@ func Locate(object string) int {
 	mutex.Lock()
 	id, _ := objects[object]
 	mutex.Unlock()
-	fmt.Println(object, id)
 	return id
 }
 
@@ -49,8 +47,10 @@ func StartLocate() {
 }
 
 func CollectObjects() {
-	files, e := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/*")
-	fmt.Println(files, e)
+	files, e := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/objects/*")
+	if e != nil {
+		panic(e)
+	}
 	for i := range files {
 		object := filepath.Base(files[i])
 		objects[object] = 1

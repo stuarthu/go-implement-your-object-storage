@@ -31,6 +31,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 	}
 	object := url.PathEscape(hash)
 	s := locate.Locate(object)
+	log.Println(s)
 	if len(s) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		return
