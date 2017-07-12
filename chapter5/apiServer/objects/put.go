@@ -1,13 +1,13 @@
 package objects
 
 import (
-	"../../lib/rs"
 	"../heartbeat"
 	"../locate"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"io"
+	"lib/rs"
 	"log"
 	"net/http"
 	"net/url"
@@ -43,7 +43,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 }
 
 func storeObject(r *http.Request) (int, error) {
-	s := heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS)
+	s := heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS, nil)
 	if len(s) < rs.ALL_SHARDS {
 		return http.StatusServiceUnavailable, fmt.Errorf("cannot find enough dataServer")
 	}

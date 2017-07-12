@@ -1,9 +1,9 @@
 package versions
 
 import (
-	"../../lib/es"
 	"encoding/json"
 	"io"
+	"lib/es"
 	"log"
 	"net/http"
 	"strings"

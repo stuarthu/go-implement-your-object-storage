@@ -1,10 +1,10 @@
 package rs
 
 import (
-	"../objectstream"
 	"fmt"
 	"github.com/klauspost/reedsolomon"
 	"io"
+	"lib/objectstream"
 )
 
 const (

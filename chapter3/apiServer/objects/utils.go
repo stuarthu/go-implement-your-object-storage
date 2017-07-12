@@ -1,7 +1,7 @@
 package objects
 
 import (
-	"../../lib/es"
+	"lib/es"
 	"net/http"
 	"strconv"
 	"strings"
@@ -31,11 +31,9 @@ func addVersion(r *http.Request) error {
 	hash := getHashFromHeader(r)
 	size := getSizeFromHeader(r)
 
-	version, _, e := es.SearchLatestVersion(name)
+	version, e := es.SearchLatestVersion(name)
 	if e != nil {
 		return e
 	}
-	version += 1
-
-	return es.PutVersion(name, version, size, hash)
+	return es.PutVersion(name, version.Version+1, size, hash)
 }

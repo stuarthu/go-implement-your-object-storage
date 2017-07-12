@@ -1,9 +1,11 @@
 package objects
 
 import (
-	"../../lib/es"
+	"../heartbeat"
 	"../locate"
 	"io"
+	"lib/es"
+	"lib/rs"
 	"log"
 	"net/http"
 	"net/url"
@@ -13,42 +15,45 @@ import (
 
 func get(w http.ResponseWriter, r *http.Request) {
 	name := strings.Split(r.URL.EscapedPath(), "/")[2]
-	version := r.URL.Query()["version"]
-	var hash string
-	if len(version) == 0 {
-		_, hash, _ = es.SearchLatestVersion(name)
+	versionId := r.URL.Query()["version"]
+	var version es.Metadata
+	var e error
+	if len(versionId) == 0 {
+		version, e = es.SearchLatestVersion(name)
 	} else {
-		v, e := strconv.Atoi(version[0])
+		vid, e := strconv.Atoi(versionId[0])
 		if e != nil {
+			log.Println(e)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		hash, _ = es.GetHash(name, v)
+		version, e = es.GetVersion(name, vid)
 	}
-	if hash == "" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	object := url.PathEscape(hash)
-	s := locate.Locate(object)
-	log.Println(s)
-	if len(s) == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	request, e := http.NewRequest("GET", "http://"+s[0].Addr+"/objects/"+object, r.Body)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	client := http.Client{}
-	nr, e := client.Do(request)
+	if version.Hash == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	object := url.PathEscape(version.Hash)
+	locateInfo := locate.Locate(object)
+	if len(locateInfo) == 0 {
+		log.Println("found object in metadataServer but not in dataServer")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	ds := make([]string, 0)
+	if len(locateInfo) != rs.ALL_SHARDS {
+		ds = heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS-len(locateInfo), locateInfo)
+	}
+	stream, e := rs.NewRSGetStream(locateInfo, ds, object, version.Size)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(nr.StatusCode)
-	io.Copy(w, nr.Body)
+	io.Copy(w, stream)
 }

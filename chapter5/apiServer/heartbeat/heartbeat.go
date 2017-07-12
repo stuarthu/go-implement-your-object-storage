@@ -1,7 +1,7 @@
 package heartbeat
 
 import (
-	"../../lib/rabbitmq"
+	"lib/rabbitmq"
 	"math/rand"
 	"os"
 	"strconv"
@@ -28,12 +28,19 @@ func ListenHeartbeat() {
 	}
 }
 
-func ChooseRandomDataServers(s int) (ds []string) {
+func ChooseRandomDataServers(s int, exclude map[int]string) (ds []string) {
 	good := make([]string, 0)
 	bad := make([]string, 0)
+	excludeMap := make(map[string]int)
+	for id, addr := range exclude {
+		excludeMap[addr] = id
+	}
 	for s, t := range DataServers {
 		if t.Add(30 * time.Second).After(time.Now()) {
-			good = append(good, s)
+			_, excluded := excludeMap[s]
+			if !excluded {
+				good = append(good, s)
+			}
 		} else {
 			bad = append(bad, s)
 		}

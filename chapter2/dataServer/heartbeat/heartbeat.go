@@ -1,7 +1,7 @@
 package heartbeat
 
 import (
-	"../../lib/rabbitmq"
+	"lib/rabbitmq"
 	"os"
 	"time"
 )
