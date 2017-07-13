@@ -22,12 +22,14 @@ func StoreObject(r io.Reader, hash string, size int64) (int, error) {
 	if len(ds) < rs.ALL_SHARDS {
 		return http.StatusServiceUnavailable, fmt.Errorf("cannot find enough dataServer")
 	}
+
 	h := sha256.New()
 	reader := io.TeeReader(r, h)
 	stream, e := rs.NewRSPutStream(ds, url.PathEscape(hash), size)
 	if e != nil {
 		return http.StatusInternalServerError, e
 	}
+
 	io.Copy(stream, reader)
 	stream.Close()
 	digest := base64.StdEncoding.EncodeToString(h.Sum(nil))

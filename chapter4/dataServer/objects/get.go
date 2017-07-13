@@ -1,9 +1,9 @@
 package objects
 
 import (
+	"../locate"
 	"crypto/sha256"
 	"encoding/base64"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -20,18 +20,16 @@ func get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	object := files[0]
-	hash := strings.Split(object, ".")[2]
-	f, _ := os.Open(object)
-	defer f.Close()
 	h := sha256.New()
-	io.Copy(h, f)
+	sendObject(h, object)
 	d := url.PathEscape(base64.StdEncoding.EncodeToString(h.Sum(nil)))
+	hash := strings.Split(object, ".")[2]
 	if d != hash {
 		log.Println("object hash mismatch, remove", object)
+		locate.Del(object)
 		os.Remove(object)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	f.Seek(0, 0)
-	io.Copy(w, f)
+	sendObject(w, object)
 }

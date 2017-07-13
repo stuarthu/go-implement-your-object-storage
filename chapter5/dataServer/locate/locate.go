@@ -29,6 +29,12 @@ func Add(object string, id int) {
 	mutex.Unlock()
 }
 
+func Del(object string) {
+	mutex.Lock()
+	delete(objects, object)
+	mutex.Unlock()
+}
+
 func StartLocate() {
 	q := rabbitmq.New(os.Getenv("RABBITMQ_SERVER"))
 	defer q.Close()

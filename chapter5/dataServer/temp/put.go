@@ -1,8 +1,13 @@
 package temp
 
 import (
+	"../locate"
+	"crypto/sha256"
+	"encoding/base64"
+	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -38,5 +43,12 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-    copyTempToObjects(f, tempinfo)
+	h := sha256.New()
+	io.Copy(h, f)
+	d := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	name := os.Getenv("STORAGE_ROOT") + "/objects/" + tempinfo.Name + "." + url.PathEscape(d)
+	f.Seek(0, 0)
+	copyTempToObjects(f, name)
+	locate.Add(tempinfo.object(), tempinfo.id())
+	os.Remove(datFile)
 }
