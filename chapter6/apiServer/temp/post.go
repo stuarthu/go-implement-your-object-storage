@@ -8,6 +8,7 @@ import (
 	"lib/utils"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -25,7 +26,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 	size, e := strconv.ParseInt(r.Header.Get("size"), 0, 64)
 	if e != nil {
 		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	hash := utils.GetHashFromHeader(r)
@@ -44,7 +45,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 	}
 	uuid := stream.Uuid
 	t := tempToken{name, size, hash, server, uuid}
-	w.Write([]byte(t.toString()))
+	w.Write([]byte(url.PathEscape(t.toString())))
 }
 
 func (t *tempToken) toString() string {
