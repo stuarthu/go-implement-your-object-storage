@@ -8,8 +8,8 @@ import (
 )
 
 type TempPutStream struct {
-	server string
-	uuid   string
+	Server string
+	Uuid   string
 }
 
 func NewTempPutStream(server, object string, size int64) (*TempPutStream, error) {
@@ -31,7 +31,7 @@ func NewTempPutStream(server, object string, size int64) (*TempPutStream, error)
 }
 
 func (w *TempPutStream) Write(p []byte) (n int, err error) {
-	request, e := http.NewRequest("PATCH", "http://"+w.server+"/temp/"+w.uuid, strings.NewReader(string(p)))
+	request, e := http.NewRequest("PATCH", "http://"+w.Server+"/temp/"+w.Uuid, strings.NewReader(string(p)))
 	if e != nil {
 		return 0, e
 	}
@@ -51,12 +51,12 @@ func (w *TempPutStream) Close(good bool) (int, error) {
 	if good {
 		method = "PUT"
 	}
-	request, _ := http.NewRequest(method, "http://"+w.server+"/temp/"+w.uuid, nil)
+	request, _ := http.NewRequest(method, "http://"+w.Server+"/temp/"+w.Uuid, nil)
 	client := http.Client{}
 	r, e := client.Do(request)
 	return r.StatusCode, e
 }
 
 func (w *TempPutStream) NewTempGetStream() (*GetStream, error) {
-	return newGetStream("http://" + w.server + "/temp/" + w.uuid)
+	return newGetStream("http://" + w.Server + "/temp/" + w.Uuid)
 }

@@ -8,22 +8,26 @@ import (
 	"fmt"
 	"io"
 	"lib/rs"
+	"lib/utils"
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func put(w http.ResponseWriter, r *http.Request) {
-	hash := getHashFromHeader(r)
+	hash := utils.GetHashFromHeader(r)
 	if hash == "" {
 		log.Println("missing object hash in digest header")
 		w.WriteHeader(http.StatusBadRequest)
+
 		return
 	}
 
 	info := locate.Locate(url.PathEscape(hash))
+	size := utils.GetSizeFromHeader(r)
 	if len(info) == 0 {
-		c, e := storeObject(r)
+		c, e := StoreObject(r.Body, hash, size)
 		if e != nil {
 			log.Println(e)
 			w.WriteHeader(c)
@@ -35,23 +39,22 @@ func put(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	e := addVersion(r)
+	name := strings.Split(r.URL.EscapedPath(), "/")[2]
+	e := utils.AddVersion(name, hash, size)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
-func storeObject(r *http.Request) (int, error) {
-	s := heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS, nil)
-	if len(s) < rs.ALL_SHARDS {
+func StoreObject(r io.Reader, hash string, size int64) (int, error) {
+	ds := heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS, nil)
+	if len(ds) < rs.ALL_SHARDS {
 		return http.StatusServiceUnavailable, fmt.Errorf("cannot find enough dataServer")
 	}
-	hash := getHashFromHeader(r)
-	size := getSizeFromHeader(r)
 	h := sha256.New()
-	reader := io.TeeReader(r.Body, h)
-	stream, e := rs.NewRSPutStream(s, url.PathEscape(hash), size)
+	reader := io.TeeReader(r, h)
+	stream, e := rs.NewRSPutStream(ds, url.PathEscape(hash), size)
 	if e != nil {
 		return http.StatusInternalServerError, e
 	}
