@@ -1,36 +1,10 @@
 package locate
 
 import (
-	"../../lib/rabbitmq"
 	"encoding/json"
 	"net/http"
-	"os"
 	"strings"
-	"time"
 )
-
-type locateMessage struct {
-	Addr string
-	Id   int
-}
-
-func Locate(name string) (locateInfo []locateMessage) {
-	q := rabbitmq.New(os.Getenv("RABBITMQ_SERVER"))
-	q.Publish("dataServers", name)
-	c := q.Consume()
-	go func() {
-		time.Sleep(time.Second)
-		q.Close()
-	}()
-	msg := <-c
-	if len(msg.Body) == 0 {
-		return
-	}
-	var info locateMessage
-	json.Unmarshal(msg.Body, &info)
-	locateInfo = append(locateInfo, info)
-	return
-}
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	m := r.Method
@@ -43,9 +17,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	for i := range info {
-		b, _ := json.Marshal(info[i])
-		w.Write(b)
-		w.Write([]byte("\n"))
-	}
+	b, _ := json.Marshal(info)
+	w.Write(b)
 }

@@ -34,6 +34,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	os.Create(os.Getenv("STORAGE_ROOT") + "/temp/" + t.Uuid + ".dat")
 	w.Write([]byte(uuid))
 }
 
@@ -50,7 +51,7 @@ func readFromFile(uuid string) (*tempInfo, error) {
 }
 
 func (t *tempInfo) writeToFile() error {
-	f, e := os.OpenFile(os.Getenv("STORAGE_ROOT")+"/temp/"+t.Uuid, os.O_WRONLY|os.O_CREATE, 0600)
+	f, e := os.Create(os.Getenv("STORAGE_ROOT") + "/temp/" + t.Uuid)
 	if e != nil {
 		return e
 	}
@@ -58,15 +59,4 @@ func (t *tempInfo) writeToFile() error {
 	b, _ := json.Marshal(t)
 	f.Write(b)
 	return nil
-}
-
-func (t *tempInfo) object() string {
-	s := strings.Split(t.Name, ".")
-	return s[0]
-}
-
-func (t *tempInfo) id() int {
-	s := strings.Split(t.Name, ".")
-	id, _ := strconv.Atoi(s[1])
-	return id
 }

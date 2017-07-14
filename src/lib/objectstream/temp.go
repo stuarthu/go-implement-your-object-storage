@@ -46,15 +46,14 @@ func (w *TempPutStream) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func (w *TempPutStream) Close(good bool) (int, error) {
+func (w *TempPutStream) Commit(good bool) {
 	method := "DELETE"
 	if good {
 		method = "PUT"
 	}
 	request, _ := http.NewRequest(method, "http://"+w.Server+"/temp/"+w.Uuid, nil)
 	client := http.Client{}
-	r, e := client.Do(request)
-	return r.StatusCode, e
+	client.Do(request)
 }
 
 func (w *TempPutStream) NewTempGetStream() (*GetStream, error) {

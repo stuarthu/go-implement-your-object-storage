@@ -1,8 +1,7 @@
 package heartbeat
 
 import (
-	"../../lib/rabbitmq"
-	"math/rand"
+	"lib/rabbitmq"
 	"os"
 	"strconv"
 	"sync"
@@ -24,27 +23,15 @@ func ListenHeartbeat() {
 		}
 		mutex.Lock()
 		dataServers[dataServer] = time.Now()
+		removeExpiredDataServer()
 		mutex.Unlock()
 	}
 }
 
-func ChooseRandomDataServer() string {
-	n := len(dataServers)
-	if n == 0 {
-		return ""
-	}
-	i := rand.Intn(n)
+func removeExpiredDataServer() {
 	for s, t := range dataServers {
-		if i == 0 {
-			if t.Add(30 * time.Second).After(time.Now()) {
-				return s
-			}
-			mutex.Lock()
+		if t.Add(30 * time.Second).Before(time.Now()) {
 			delete(dataServers, s)
-			mutex.Unlock()
-			return ChooseRandomDataServer()
 		}
-		i--
 	}
-	panic("should not pass here")
 }

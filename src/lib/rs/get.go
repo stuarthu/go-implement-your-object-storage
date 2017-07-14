@@ -94,14 +94,14 @@ func repair(locateInfo map[int]string, dataReaders []io.Reader, object string, s
 	if e != nil {
 		for i := range dataWriters {
 			if dataWriters[i] != nil {
-				dataWriters[i].(*objectstream.TempPutStream).Close(false)
+				dataWriters[i].(*objectstream.TempPutStream).Commit(false)
 			}
 		}
 		return e
 	}
 	for i := range dataWriters {
 		if dataWriters[i] != nil {
-			dataWriters[i].(*objectstream.TempPutStream).Close(true)
+			dataWriters[i].(*objectstream.TempPutStream).Commit(true)
 		}
 	}
 	return nil

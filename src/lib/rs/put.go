@@ -63,7 +63,7 @@ func (w *RSPutStream) Close() error {
 	w.writer.(*io.PipeWriter).Close()
 	e := <-w.c
 	if e != nil {
-		return nil
+		return e
 	}
 
 	dataReaders := make([]io.Reader, DATA_SHARDS)
@@ -84,15 +84,16 @@ func (w *RSPutStream) Close() error {
 	return w.enc.Encode(dataReaders, w.parityWriters)
 }
 
-func (w *RSPutStream) Submit(success bool) {
+func (w *RSPutStream) Commit(success bool) {
+	w.Close()
 	for i := range w.dataWriters {
 		if w.dataWriters[i] != nil {
-			w.dataWriters[i].(*objectstream.TempPutStream).Close(success)
+			w.dataWriters[i].(*objectstream.TempPutStream).Commit(success)
 		}
 	}
 	for i := range w.parityWriters {
 		if w.parityWriters[i] != nil {
-			w.parityWriters[i].(*objectstream.TempPutStream).Close(success)
+			w.parityWriters[i].(*objectstream.TempPutStream).Commit(success)
 		}
 	}
 }

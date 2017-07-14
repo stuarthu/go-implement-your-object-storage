@@ -1,31 +1,32 @@
 package locate
 
 import (
-	"../../lib/rabbitmq"
+	"lib/rabbitmq"
 	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
 )
 
-type locateMessage struct {
-	Addr string
-	Id   int
-}
-
 var objects = make(map[string]int)
 var mutex sync.Mutex
 
-func Locate(object string) int {
+func Locate(object string) bool {
 	mutex.Lock()
-	id, _ := objects[object]
+	_, ok := objects[object]
 	mutex.Unlock()
-	return id
+	return ok
 }
 
-func Add(object string, id int) {
+func Add(object string) {
 	mutex.Lock()
-	objects[object] = id
+	objects[object] = 1
+	mutex.Unlock()
+}
+
+func Del(object string) {
+	mutex.Lock()
+	delete(objects, object)
 	mutex.Unlock()
 }
 
@@ -39,18 +40,15 @@ func StartLocate() {
 		if e != nil {
 			panic(e)
 		}
-		id := Locate(object)
-		if id != 0 {
-			q.Send(msg.ReplyTo, locateMessage{Addr: os.Getenv("LISTEN_ADDRESS"), Id: id})
+		exist := Locate(object)
+		if exist {
+			q.Send(msg.ReplyTo, os.Getenv("LISTEN_ADDRESS"))
 		}
 	}
 }
 
 func CollectObjects() {
-	files, e := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/objects/*")
-	if e != nil {
-		panic(e)
-	}
+	files, _ := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/objects/*")
 	for i := range files {
 		object := filepath.Base(files[i])
 		objects[object] = 1

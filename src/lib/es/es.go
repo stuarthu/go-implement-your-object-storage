@@ -93,6 +93,7 @@ func PutVersion(name string, version int, size int64, hash string) error {
 	return nil
 }
 
+//TODO fix this
 func SearchVersions(name string) (int, io.Reader, error) {
 	client := http.Client{}
 	url := "http://" + os.Getenv("ES_SERVER") + "/metadata/objects/_search"
