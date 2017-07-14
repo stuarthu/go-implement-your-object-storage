@@ -1,7 +1,7 @@
 package locate
 
 import (
-	"../../lib/rabbitmq"
+	"lib/rabbitmq"
 	"os"
 	"strconv"
 )
@@ -17,11 +17,11 @@ func StartLocate() {
 	q.Bind("dataServers")
 	c := q.Consume()
 	for msg := range c {
-		n, e := strconv.Unquote(string(msg.Body))
+		object, e := strconv.Unquote(string(msg.Body))
 		if e != nil {
 			panic(e)
 		}
-		if Locate(os.Getenv("STORAGE_ROOT") + "/objects/" + n) {
+		if Locate(os.Getenv("STORAGE_ROOT") + "/objects/" + object) {
 			q.Send(msg.ReplyTo, os.Getenv("LISTEN_ADDRESS"))
 		}
 	}

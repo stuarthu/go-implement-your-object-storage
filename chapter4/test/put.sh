@@ -10,12 +10,12 @@ curl -v 10.29.2.1:12345/objects/test4_2 -XPUT -d "this object will have only 1 i
 
 ls -ltr /tmp/?/objects
 
-curl -v 10.29.2.1:12345/objects/test4_1
+curl 10.29.2.1:12345/objects/test4_1
 
-curl -v 10.29.2.1:12345/objects/test4_2
+curl 10.29.2.1:12345/objects/test4_2
 
-curl -v 10.29.2.1:12345/locate/aWKQ2BipX94sb+h3xdTbWYAu1yzjn5vyFG2SOwUQIXY=
+curl 10.29.2.1:12345/locate/aWKQ2BipX94sb+h3xdTbWYAu1yzjn5vyFG2SOwUQIXY=
 
-curl -v 10.29.2.1:12345/versions/test4_1
+curl 10.29.2.1:12345/versions/test4_1
 
-curl -v 10.29.2.1:12345/versions/test4_2
+curl 10.29.2.1:12345/versions/test4_2
