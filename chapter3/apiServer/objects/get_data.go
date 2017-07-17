@@ -1,12 +1,12 @@
 package objects
 
 import (
-	"lib/objectstream"
-    "io"
-    "net/url"
 	"../locate"
 	"errors"
+	"io"
 	"lib/es"
+	"lib/objectstream"
+	"net/url"
 )
 
 func getData(meta es.Metadata) (io.Reader, error) {

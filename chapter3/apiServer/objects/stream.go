@@ -7,11 +7,11 @@ import (
 	"net/url"
 )
 
-func createStream(hash string, size int64) (*objectstream.TempPutStream, error) {
+func createStream(hash string) (*objectstream.PutStream, error) {
 	server := heartbeat.ChooseRandomDataServer()
 	if server == "" {
 		return nil, fmt.Errorf("cannot find any dataServer")
 	}
 
-	return objectstream.NewTempPutStream(server, url.PathEscape(hash), size)
+	return objectstream.NewPutStream(server, url.PathEscape(hash)), nil
 }

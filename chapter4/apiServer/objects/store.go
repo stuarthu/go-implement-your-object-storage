@@ -1,19 +1,19 @@
 package objects
 
 import (
+	"../locate"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
-    "../locate"
 	"net/url"
 )
 
 func StoreObject(r io.Reader, hash string, size int64) (int, error) {
-    if locate.Exist(url.PathEscape(hash)) {
-        return http.StatusOK, nil
-    }
+	if locate.Exist(url.PathEscape(hash)) {
+		return http.StatusOK, nil
+	}
 
 	stream, e := createStream(url.PathEscape(hash), size)
 	if e != nil {

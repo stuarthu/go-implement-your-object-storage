@@ -30,15 +30,18 @@ type searchResult struct {
 
 func GetVersion(name string, versionId int) (version Metadata, e error) {
 	client := http.Client{}
-	request, _ := http.NewRequest("GET",
+	request, e := http.NewRequest("GET",
 		fmt.Sprintf("http://%s/metadata/objects/%s_%d/_source?",
-			os.Getenv("ES_SERVER"), name, version), nil)
+			os.Getenv("ES_SERVER"), name, versionId), nil)
+	if e != nil {
+		return
+	}
 	r, e := client.Do(request)
 	if e != nil {
 		return
 	}
 	if r.StatusCode != http.StatusOK {
-		e = fmt.Errorf("fail to get %s_%d: %d", name, version, r.StatusCode)
+		e = fmt.Errorf("fail to get %s_%d: %d", name, versionId, r.StatusCode)
 		return
 	}
 	result, _ := ioutil.ReadAll(r.Body)
@@ -93,17 +96,17 @@ func PutVersion(name string, version int, size int64, hash string) error {
 	return nil
 }
 
-//TODO fix this
-func SearchVersions(name string) (int, io.Reader, error) {
+func SearchVersions(name string, from, size int) (io.Reader, error) {
 	client := http.Client{}
-	url := "http://" + os.Getenv("ES_SERVER") + "/metadata/objects/_search"
+	url := fmt.Sprintf("http://%s/metadata/objects/_search?sort=version&from=%d&size=%d",
+		os.Getenv("ES_SERVER"), from, size)
 	if name != "" {
-		url += "?q=name:" + name
+		url += "&q=name:" + name
 	}
 	request, _ := http.NewRequest("GET", url, nil)
 	r, e := client.Do(request)
 	if e != nil {
-		return 0, nil, e
+		return nil, e
 	}
-	return r.StatusCode, r.Body, nil
+	return r.Body, nil
 }
