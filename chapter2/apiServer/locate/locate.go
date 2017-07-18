@@ -19,8 +19,8 @@ func Locate(name string) string {
 	//if len(msg.Body) == 0 {
 	//	return
 	//}
-    s, _ := strconv.Unquote(string(msg.Body))
-    return s
+	s, _ := strconv.Unquote(string(msg.Body))
+	return s
 }
 
 func Exist(name string) bool {

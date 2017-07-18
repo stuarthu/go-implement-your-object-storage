@@ -20,5 +20,5 @@ func getObject(hash string) string {
 		os.Remove(object)
 		return ""
 	}
-    return object
+	return object
 }

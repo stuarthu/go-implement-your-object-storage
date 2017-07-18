@@ -1,5 +1,5 @@
 #!/bin/bash
 
-dd if=/dev/zero of=file bs=1M count=10
+dd if=/dev/zero of=/tmp/file bs=1M count=10
 
-openssl dgst -sha256 -binary file | base64
+openssl dgst -sha256 -binary /tmp/file | base64

@@ -2,6 +2,7 @@ package temp
 
 import (
 	"../locate"
+	"compress/gzip"
 	"crypto/sha256"
 	"encoding/base64"
 	"io"

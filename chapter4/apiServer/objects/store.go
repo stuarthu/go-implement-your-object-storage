@@ -15,7 +15,7 @@ func StoreObject(r io.Reader, hash string, size int64) (int, error) {
 		return http.StatusOK, nil
 	}
 
-	stream, e := createStream(url.PathEscape(hash), size)
+	stream, e := putStream(url.PathEscape(hash), size)
 	if e != nil {
 		return http.StatusInternalServerError, e
 	}

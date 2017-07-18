@@ -7,7 +7,7 @@ import (
 	"net/url"
 )
 
-func createStream(hash string, size int64) (*objectstream.TempPutStream, error) {
+func putStream(hash string, size int64) (*objectstream.TempPutStream, error) {
 	server := heartbeat.ChooseRandomDataServer()
 	if server == "" {
 		return nil, fmt.Errorf("cannot find any dataServer")

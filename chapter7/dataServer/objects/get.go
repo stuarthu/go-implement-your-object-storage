@@ -1,1 +1,1 @@
-../../../chapter6/dataServer/objects/get.go
+../../../chapter4/dataServer/objects/get.go

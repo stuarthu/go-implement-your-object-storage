@@ -7,9 +7,12 @@ import (
 )
 
 func sendObject(w io.Writer, object string) {
-	f, _ := os.Open(object)
+	f, e := os.Open(object)
+	if e != nil {
+		panic(e)
+	}
 	defer f.Close()
-	gzipStream, _ := gzip.NewReader(f)
+	gzipStream, e := gzip.NewReader(f)
 	defer gzipStream.Close()
 	io.Copy(w, gzipStream)
 }

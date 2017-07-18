@@ -11,10 +11,10 @@ func ChooseRandomDataServer() string {
 	}
 	i := rand.Intn(n)
 	for s, _ := range dataServers {
-        if i == 0 {
-            return s
-        }
-        i--
+		if i == 0 {
+			return s
+		}
+		i--
 	}
 	panic("should not pass here")
 }

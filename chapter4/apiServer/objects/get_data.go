@@ -1,1 +1,0 @@
-../../../chapter3/apiServer/objects/get_data.go

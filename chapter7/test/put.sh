@@ -1,7 +1,7 @@
 #!/bin/bash
 
-curl -v 10.29.2.1:12345/objects/test7 -XPUT --data-binary @file -H "Digest: SHA-256=$1"
+curl -v 10.29.2.1:12345/objects/test7 -XPUT --data-binary @/tmp/file -H "Digest: SHA-256=5bhEzFf1cJTqRYXiNfNseMHNIiJiu4nVPJTctNaz5V0="
 
-curl 10.29.2.1:12345/objects/test7 -o output
+curl -v 10.29.2.1:12345/objects/test7 -o /tmp/output
 
-diff output file
+diff /tmp/output /tmp/file

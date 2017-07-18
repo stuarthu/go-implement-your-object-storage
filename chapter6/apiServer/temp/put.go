@@ -17,15 +17,15 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	putStream := &objectstream.TempPutStream{t.Server, t.Uuid}
-	defer putStream.Close(false)
-	getStream, e := putStream.NewTempGetStream()
+	tempPutStream := &objectstream.TempPutStream{t.Server, t.Uuid}
+	defer tempPutStream.Commit(false)
+	tempGetStream, e := tempPutStream.NewTempGetStream()
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	c, e := objects.StoreObject(getStream, t.Hash, t.Size)
+	c, e := objects.StoreObject(tempGetStream, t.Hash, t.Size)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(c)

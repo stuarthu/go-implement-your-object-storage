@@ -35,7 +35,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				if e != io.EOF {
 					log.Println(e)
 				}
-                break
+				break
 			}
 			if t == "_source" {
 				count++

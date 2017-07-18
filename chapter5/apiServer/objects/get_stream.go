@@ -5,13 +5,10 @@ import (
 	"../locate"
 	"errors"
 	"io"
-	"lib/es"
 	"lib/rs"
-	"net/url"
 )
 
-func getData(meta es.Metadata) (io.Reader, error) {
-	object := url.PathEscape(meta.Hash)
+func getStream(object string, size int64) (io.Reader, error) {
 	locateInfo := locate.Locate(object)
 	if len(locateInfo) < rs.DATA_SHARDS {
 		return nil, errors.New("object locate fail")
@@ -20,5 +17,5 @@ func getData(meta es.Metadata) (io.Reader, error) {
 	if len(locateInfo) != rs.ALL_SHARDS {
 		ds = heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS-len(locateInfo), locateInfo)
 	}
-	return rs.NewRSGetStream(locateInfo, ds, object, meta.Size)
+	return rs.NewRSGetStream(locateInfo, ds, object, size)
 }

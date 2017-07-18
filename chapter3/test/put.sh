@@ -26,7 +26,7 @@ curl 10.29.2.1:12345/objects/test3?version=1
 echo
 curl -v 10.29.2.1:12345/objects/test3 -XDELETE
 
-curl 10.29.2.1:12345/objects/test3
+curl -v 10.29.2.1:12345/objects/test3
 echo
 
 curl 10.29.2.1:12345/versions/test3
