@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var dataServers = make(map[string]time.Time)
+var DataServers = make(map[string]time.Time)
 var mutex sync.Mutex
 
 func ListenHeartbeat() {
@@ -22,16 +22,16 @@ func ListenHeartbeat() {
 			panic(e)
 		}
 		mutex.Lock()
-		dataServers[dataServer] = time.Now()
+		DataServers[dataServer] = time.Now()
 		removeExpiredDataServer()
 		mutex.Unlock()
 	}
 }
 
 func removeExpiredDataServer() {
-	for s, t := range dataServers {
+	for s, t := range DataServers {
 		if t.Add(30 * time.Second).Before(time.Now()) {
-			delete(dataServers, s)
+			delete(DataServers, s)
 		}
 	}
 }

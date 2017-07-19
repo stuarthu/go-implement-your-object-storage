@@ -8,5 +8,5 @@ func getMetaData(name string, version int) (es.Metadata, error) {
 	if version == -1 {
 		return es.SearchLatestVersion(name)
 	}
-	return es.GetVersion(name, version)
+	return es.GetMetadata(name, version)
 }

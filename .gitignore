@@ -1,3 +1,6 @@
 chapter1/chapter1
 */dataServer/dataServer
 */apiServer/apiServer
+*/deleteOldMetadata/deleteOldMetadata
+*/deleteOrphanObject/deleteOrphanObject
+*/objectScanner/objectScanner

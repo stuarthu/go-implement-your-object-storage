@@ -12,17 +12,17 @@ type RabbitMQ struct {
 }
 
 func New(s string) *RabbitMQ {
-	conn, er := amqp.Dial(s)
-	if er != nil {
-		panic(er)
+	conn, e := amqp.Dial(s)
+	if e != nil {
+		panic(e)
 	}
 
-	ch, er := conn.Channel()
-	if er != nil {
-		panic(er)
+	ch, e := conn.Channel()
+	if e != nil {
+		panic(e)
 	}
 
-	q, er := ch.QueueDeclare(
+	q, e := ch.QueueDeclare(
 		"",    // name
 		false, // durable
 		true,  // delete when unused
@@ -30,8 +30,8 @@ func New(s string) *RabbitMQ {
 		false, // no-wait
 		nil,   // arguments
 	)
-	if er != nil {
-		panic(er)
+	if e != nil {
+		panic(e)
 	}
 
 	mq := new(RabbitMQ)
@@ -40,17 +40,17 @@ func New(s string) *RabbitMQ {
 	return mq
 }
 
-func (q *RabbitMQ) Bind(e string) {
-	er := q.channel.QueueBind(
-		q.Name, // queue name
-		"",     // routing key
-		e,      // exchange
+func (q *RabbitMQ) Bind(exchange string) {
+	e := q.channel.QueueBind(
+		q.Name,   // queue name
+		"",       // routing key
+		exchange, // exchange
 		false,
 		nil)
-	if er != nil {
-		panic(er)
+	if e != nil {
+		panic(e)
 	}
-	q.exchange = e
+	q.exchange = exchange
 }
 
 func (q *RabbitMQ) Send(queue string, body interface{}) {

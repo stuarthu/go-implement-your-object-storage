@@ -22,13 +22,10 @@ func AddVersion(name, hash string, size int64) error {
 	if e != nil {
 		return e
 	}
-	return es.PutVersion(name, version.Version+1, size, hash)
+	return es.PutMetadata(name, version.Version+1, size, hash)
 }
 
 func GetSizeFromHeader(r *http.Request) int64 {
-	size, e := strconv.ParseInt(r.Header.Get("content-length"), 0, 64)
-	if e != nil {
-		panic(e)
-	}
+	size, _ := strconv.ParseInt(r.Header.Get("content-length"), 0, 64)
 	return size
 }

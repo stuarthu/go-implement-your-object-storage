@@ -15,7 +15,7 @@ func del(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	e = es.PutVersion(name, version.Version+1, 0, "")
+	e = es.PutMetadata(name, version.Version+1, 0, "")
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)

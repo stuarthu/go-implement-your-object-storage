@@ -3,13 +3,15 @@ package objects
 import (
 	"compress/gzip"
 	"io"
+	"log"
 	"os"
 )
 
 func sendObject(w io.Writer, object string) {
 	f, e := os.Open(object)
 	if e != nil {
-		panic(e)
+		log.Println(e)
+		return
 	}
 	defer f.Close()
 	gzipStream, e := gzip.NewReader(f)

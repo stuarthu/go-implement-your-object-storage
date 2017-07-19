@@ -2,7 +2,6 @@ package versions
 
 import (
 	"encoding/json"
-	"io"
 	"lib/es"
 	"log"
 	"net/http"
@@ -15,43 +14,24 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	more := true
 	from := 0
 	size := 1000
-	for more {
-		body, e := es.SearchVersions(strings.Split(r.URL.EscapedPath(), "/")[2], from, size)
+	name := strings.Split(r.URL.EscapedPath(), "/")[2]
+	for true {
+		metas, e := es.SearchAllVersions(name, from, size)
 		if e != nil {
 			log.Println(e)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		for i := range metas {
+			b, _ := json.Marshal(metas[i])
+			w.Write(b)
+			w.Write([]byte("\n"))
+		}
+		if len(metas) != size {
+			return
+		}
 		from += size
-		dec := json.NewDecoder(body)
-		enc := json.NewEncoder(w)
-		count := 0
-		for {
-			t, e := dec.Token()
-			if e != nil {
-				if e != io.EOF {
-					log.Println(e)
-				}
-				break
-			}
-			if t == "_source" {
-				count++
-				var m es.Metadata
-				e = dec.Decode(&m)
-				if e != nil {
-					log.Println(e)
-				}
-				e = enc.Encode(&m)
-				if e != nil {
-					log.Println(e)
-				}
-			}
-		}
-		if count != size {
-			more = false
-		}
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"lib/rs"
 )
 
-func getStream(object string, size int64) (io.Reader, error) {
+func GetStream(object string, size int64) (io.Reader, error) {
 	locateInfo := locate.Locate(object)
 	if len(locateInfo) < rs.DATA_SHARDS {
 		return nil, errors.New("object locate fail")

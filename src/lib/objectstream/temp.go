@@ -15,7 +15,7 @@ type TempPutStream struct {
 func NewTempPutStream(server, object string, size int64) (*TempPutStream, error) {
 	request, e := http.NewRequest("POST", "http://"+server+"/temp/"+object, nil)
 	if e != nil {
-		panic(e)
+		return nil, e
 	}
 	request.Header.Set("size", fmt.Sprintf("%d", size))
 	client := http.Client{}
@@ -25,7 +25,7 @@ func NewTempPutStream(server, object string, size int64) (*TempPutStream, error)
 	}
 	uuid, e := ioutil.ReadAll(response.Body)
 	if e != nil {
-		panic(e)
+		return nil, e
 	}
 	return &TempPutStream{server, string(uuid)}, nil
 }
