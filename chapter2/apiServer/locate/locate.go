@@ -16,9 +16,6 @@ func Locate(name string) string {
 		q.Close()
 	}()
 	msg := <-c
-	//if len(msg.Body) == 0 {
-	//	return
-	//}
 	s, _ := strconv.Unquote(string(msg.Body))
 	return s
 }
