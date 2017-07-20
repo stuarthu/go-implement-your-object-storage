@@ -4,6 +4,7 @@ import (
 	"../locate"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func del(name string) {
@@ -11,6 +12,7 @@ func del(name string) {
 	if len(files) != 1 {
 		return
 	}
-	locate.Del(name)
-	os.Remove(files[0])
+	object := strings.Split(name, ".")[0]
+	locate.Del(object)
+	os.Rename(files[0], os.Getenv("STORAGE_ROOT")+"/garbage/"+filepath.Base(files[0]))
 }

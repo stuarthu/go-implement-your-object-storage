@@ -15,6 +15,10 @@ func sendObject(w io.Writer, object string) {
 	}
 	defer f.Close()
 	gzipStream, e := gzip.NewReader(f)
-	defer gzipStream.Close()
+	if e != nil {
+		log.Println(e)
+		return
+	}
 	io.Copy(w, gzipStream)
+	gzipStream.Close()
 }

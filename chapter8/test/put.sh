@@ -22,5 +22,9 @@ curl 10.29.2.1:12345/versions/test8
 ES_SERVER=10.29.102.173:9200 RABBITMQ_SERVER=amqp://test:test@10.29.102.173:5672 go run ../deleteOrphanObject/deleteOrphanObject.go
 ls -ltr /tmp/?/objects
 
+rm /tmp/1/objects/66WuRH0s0albWDZ9nTmjFo9JIqTTXmB6EiRkhTh1zeA=.*
+echo some_garbage > /tmp/2/objects/66WuRH0s0albWDZ9nTmjFo9JIqTTXmB6EiRkhTh1zeA=.*
+ls -ltr /tmp/?/objects
 ES_SERVER=10.29.102.173:9200 RABBITMQ_SERVER=amqp://test:test@10.29.102.173:5672 go run ../objectScanner/objectScanner.go
-
+ls -ltr /tmp/?/objects
+ls -ltr /tmp/?/garbage

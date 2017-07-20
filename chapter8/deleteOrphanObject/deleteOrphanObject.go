@@ -12,7 +12,7 @@ import (
 
 func main() {
 	go heartbeat.ListenHeartbeat()
-	time.Sleep(10 * time.Second)
+	time.Sleep(6 * time.Second)
 
 	for dataServer, _ := range heartbeat.DataServers {
 		url := "http://" + dataServer + "/objects/"
@@ -34,12 +34,11 @@ func main() {
 				del(dataServer, object)
 			}
 		}
-		time.Sleep(5 * time.Second)
 	}
 }
 
 func del(server, object string) {
-	log.Println("delete", object)
+	log.Println("delete", object, "from", server)
 	url := "http://" + server + "/objects/" + object
 	request, _ := http.NewRequest("DELETE", url, nil)
 	client := http.Client{}

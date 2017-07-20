@@ -16,7 +16,7 @@ import (
 
 func main() {
 	go heartbeat.ListenHeartbeat()
-	time.Sleep(10 * time.Second)
+	time.Sleep(6 * time.Second)
 
 	for dataServer, _ := range heartbeat.DataServers {
 		url := "http://" + dataServer + "/objects/"
