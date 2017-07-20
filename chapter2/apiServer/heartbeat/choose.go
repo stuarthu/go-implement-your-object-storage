@@ -5,16 +5,10 @@ import (
 )
 
 func ChooseRandomDataServer() string {
-	n := len(DataServers)
+	ds := GetDataServers()
+	n := len(ds)
 	if n == 0 {
 		return ""
 	}
-	i := rand.Intn(n)
-	for s, _ := range DataServers {
-		if i == 0 {
-			return s
-		}
-		i--
-	}
-	panic("should not pass here")
+	return ds[rand.Intn(n)]
 }
