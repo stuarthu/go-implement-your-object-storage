@@ -16,6 +16,7 @@ func ListenHeartbeat() {
 	defer q.Close()
 	q.Bind("apiServers")
 	c := q.Consume()
+	go removeExpiredDataServer()
 	for msg := range c {
 		dataServer, e := strconv.Unquote(string(msg.Body))
 		if e != nil {
@@ -23,15 +24,19 @@ func ListenHeartbeat() {
 		}
 		mutex.Lock()
 		DataServers[dataServer] = time.Now()
-		removeExpiredDataServer()
 		mutex.Unlock()
 	}
 }
 
 func removeExpiredDataServer() {
-	for s, t := range DataServers {
-		if t.Add(30 * time.Second).Before(time.Now()) {
-			delete(DataServers, s)
+	for {
+		time.Sleep(5 * time.Second)
+		for s, t := range DataServers {
+			if t.Add(10 * time.Second).Before(time.Now()) {
+				mutex.Lock()
+				delete(DataServers, s)
+				mutex.Unlock()
+			}
 		}
 	}
 }
