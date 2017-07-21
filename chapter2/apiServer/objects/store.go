@@ -3,11 +3,10 @@ package objects
 import (
 	"io"
 	"net/http"
-	"net/url"
 )
 
 func StoreObject(r io.Reader, object string) (int, error) {
-	stream, e := putStream(url.PathEscape(object))
+	stream, e := putStream(object)
 	if e != nil {
 		return http.StatusServiceUnavailable, e
 	}

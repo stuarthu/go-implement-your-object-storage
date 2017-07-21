@@ -1,7 +1,9 @@
 package temp
 
 import (
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -44,4 +46,16 @@ func patch(w http.ResponseWriter, r *http.Request) {
 		log.Println("actual size", actual, "exceeds", tempinfo.Size)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func readFromFile(uuid string) (*tempInfo, error) {
+	f, e := os.Open(os.Getenv("STORAGE_ROOT") + "/temp/" + uuid)
+	if e != nil {
+		return nil, e
+	}
+	defer f.Close()
+	b, _ := ioutil.ReadAll(f)
+	var info tempInfo
+	json.Unmarshal(b, &info)
+	return &info, nil
 }

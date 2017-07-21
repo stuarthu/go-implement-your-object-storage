@@ -27,7 +27,7 @@ type searchResult struct {
 	}
 }
 
-func GetMetadata(name string, versionId int) (meta Metadata, e error) {
+func getMetadata(name string, versionId int) (meta Metadata, e error) {
 	url := fmt.Sprintf("http://%s/metadata/objects/%s_%d/_source",
 		os.Getenv("ES_SERVER"), name, versionId)
 	r, e := http.Get(url)
@@ -44,7 +44,7 @@ func GetMetadata(name string, versionId int) (meta Metadata, e error) {
 }
 
 func SearchLatestVersion(name string) (meta Metadata, e error) {
-	url := fmt.Sprintf("http://%s/metadata/objects/_search?q=name:%s&size=1&sort=version:desc",
+	url := fmt.Sprintf("http://%s/metadata/_search?q=name:%s&size=1&sort=version:desc",
 		os.Getenv("ES_SERVER"), name)
 	r, e := http.Get(url)
 	if e != nil {
@@ -61,6 +61,13 @@ func SearchLatestVersion(name string) (meta Metadata, e error) {
 		meta = sr.Hits.Hits[0].Source
 	}
 	return
+}
+
+func GetMetadata(name string, version int) (Metadata, error) {
+	if version == 0 {
+		return SearchLatestVersion(name)
+	}
+	return getMetadata(name, version)
 }
 
 func PutMetadata(name string, version int, size int64, hash string) error {
@@ -84,8 +91,16 @@ func PutMetadata(name string, version int, size int64, hash string) error {
 	return nil
 }
 
+func AddVersion(name, hash string, size int64) error {
+	version, e := SearchLatestVersion(name)
+	if e != nil {
+		return e
+	}
+	return PutMetadata(name, version.Version+1, size, hash)
+}
+
 func SearchAllVersions(name string, from, size int) ([]Metadata, error) {
-	url := fmt.Sprintf("http://%s/metadata/objects/_search?sort=name,version&from=%d&size=%d",
+	url := fmt.Sprintf("http://%s/metadata/_search?sort=name,version&from=%d&size=%d",
 		os.Getenv("ES_SERVER"), from, size)
 	if name != "" {
 		url += "&q=name:" + name
@@ -174,7 +189,7 @@ func HasObject(object string) (bool, error) {
 }
 
 func SearchHashSize(hash string) (size int64, e error) {
-	url := fmt.Sprintf("http://%s/metadata/objects/_search?q=hash:%s&size=1",
+	url := fmt.Sprintf("http://%s/metadata/_search?q=hash:%s&size=1",
 		os.Getenv("ES_SERVER"), hash)
 	r, e := http.Get(url)
 	if e != nil {

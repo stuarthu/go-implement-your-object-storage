@@ -31,13 +31,13 @@ func ListenHeartbeat() {
 func removeExpiredDataServer() {
 	for {
 		time.Sleep(5 * time.Second)
+		mutex.Lock()
 		for s, t := range dataServers {
 			if t.Add(10 * time.Second).Before(time.Now()) {
-				mutex.Lock()
 				delete(dataServers, s)
-				mutex.Unlock()
 			}
 		}
+		mutex.Unlock()
 	}
 }
 

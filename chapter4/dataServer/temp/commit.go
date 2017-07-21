@@ -6,6 +6,6 @@ import (
 )
 
 func commitTempObject(datFile string, tempinfo *tempInfo) {
-	os.Rename(datFile, os.Getenv("STORAGE_ROOT")+"/objects/"+tempinfo.Name)
-	locate.Add(tempinfo.Name)
+	os.Rename(datFile, os.Getenv("STORAGE_ROOT")+"/objects/"+tempinfo.Hash)
+	locate.Add(tempinfo.Hash)
 }

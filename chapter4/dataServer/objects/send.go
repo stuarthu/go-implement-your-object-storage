@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-func sendObject(w io.Writer, object string) {
-	f, _ := os.Open(object)
+func sendFile(w io.Writer, file string) {
+	f, _ := os.Open(file)
 	defer f.Close()
 	io.Copy(w, f)
 }

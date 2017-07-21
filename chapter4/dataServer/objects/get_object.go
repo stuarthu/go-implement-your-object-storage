@@ -9,16 +9,16 @@ import (
 	"os"
 )
 
-func getObject(hash string) string {
-	object := os.Getenv("STORAGE_ROOT") + "/objects/" + hash
+func getFile(hash string) string {
+	file := os.Getenv("STORAGE_ROOT") + "/objects/" + hash
 	h := sha256.New()
-	sendObject(h, object)
+	sendFile(h, file)
 	d := url.PathEscape(base64.StdEncoding.EncodeToString(h.Sum(nil)))
 	if d != hash {
-		log.Println("object hash mismatch, remove", object)
+		log.Println("object hash mismatch, remove", file)
 		locate.Del(hash)
-		os.Remove(object)
+		os.Remove(file)
 		return ""
 	}
-	return object
+	return file
 }

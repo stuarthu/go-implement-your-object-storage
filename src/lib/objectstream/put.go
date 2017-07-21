@@ -13,10 +13,10 @@ type PutStream struct {
 
 func NewPutStream(server, object string) *PutStream {
 	reader, writer := io.Pipe()
-	request, _ := http.NewRequest("PUT", "http://"+server+"/objects/"+object, reader)
-	client := http.Client{}
 	c := make(chan error)
 	go func() {
+		request, _ := http.NewRequest("PUT", "http://"+server+"/objects/"+object, reader)
+		client := http.Client{}
 		r, e := client.Do(request)
 		if e == nil && r.StatusCode != http.StatusOK {
 			e = fmt.Errorf("dataServer return http code %d", r.StatusCode)

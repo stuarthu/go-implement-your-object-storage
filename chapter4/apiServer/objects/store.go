@@ -27,7 +27,7 @@ func StoreObject(r io.Reader, hash string, size int64) (int, error) {
 	digest := base64.StdEncoding.EncodeToString(h.Sum(nil))
 	if digest != hash {
 		stream.Commit(false)
-		return http.StatusForbidden, fmt.Errorf("object hash mismatch, calculated=%s, requested=%s", digest, hash)
+		return http.StatusBadRequest, fmt.Errorf("object hash mismatch, calculated=%s, requested=%s", digest, hash)
 	}
 	stream.Commit(true)
 	return http.StatusOK, nil

@@ -1,7 +1,6 @@
-package utils
+package objects
 
 import (
-	"lib/es"
 	"net/http"
 	"strconv"
 )
@@ -15,14 +14,6 @@ func GetHashFromHeader(r *http.Request) string {
 		return ""
 	}
 	return digest[8:]
-}
-
-func AddVersion(name, hash string, size int64) error {
-	version, e := es.SearchLatestVersion(name)
-	if e != nil {
-		return e
-	}
-	return es.PutMetadata(name, version.Version+1, size, hash)
 }
 
 func GetSizeFromHeader(r *http.Request) int64 {

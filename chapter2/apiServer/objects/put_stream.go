@@ -4,7 +4,6 @@ import (
 	"../heartbeat"
 	"fmt"
 	"lib/objectstream"
-	"net/url"
 )
 
 func putStream(object string) (*objectstream.PutStream, error) {
@@ -13,5 +12,5 @@ func putStream(object string) (*objectstream.PutStream, error) {
 		return nil, fmt.Errorf("cannot find any dataServer")
 	}
 
-	return objectstream.NewPutStream(server, url.PathEscape(object)), nil
+	return objectstream.NewPutStream(server, object), nil
 }

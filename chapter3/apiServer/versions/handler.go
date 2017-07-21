@@ -17,7 +17,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	from := 0
 	size := 1000
 	name := strings.Split(r.URL.EscapedPath(), "/")[2]
-	for true {
+	for {
 		metas, e := es.SearchAllVersions(name, from, size)
 		if e != nil {
 			log.Println(e)
