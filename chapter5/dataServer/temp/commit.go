@@ -12,12 +12,12 @@ import (
 )
 
 func (t *tempInfo) hash() string {
-	s := strings.Split(t.Name, ".")
+	s := strings.Split(t.Hash, ".")
 	return s[0]
 }
 
 func (t *tempInfo) id() int {
-	s := strings.Split(t.Name, ".")
+	s := strings.Split(t.Hash, ".")
 	id, _ := strconv.Atoi(s[1])
 	return id
 }
@@ -28,6 +28,6 @@ func commitTempObject(datFile string, tempinfo *tempInfo) {
 	h := sha256.New()
 	io.Copy(h, f)
 	d := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	os.Rename(datFile, os.Getenv("STORAGE_ROOT")+"/objects/"+tempinfo.Name+"."+url.PathEscape(d))
+	os.Rename(datFile, os.Getenv("STORAGE_ROOT")+"/objects/"+tempinfo.Hash+"."+url.PathEscape(d))
 	locate.Add(tempinfo.hash(), tempinfo.id())
 }

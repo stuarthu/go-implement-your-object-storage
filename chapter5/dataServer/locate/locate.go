@@ -10,12 +10,12 @@ import (
 	"sync"
 )
 
-var Objects = make(map[string]int)
+var objects = make(map[string]int)
 var mutex sync.Mutex
 
 func Locate(object string) int {
 	mutex.Lock()
-	id, ok := Objects[object]
+	id, ok := objects[object]
 	mutex.Unlock()
 	if !ok {
 		return -1
@@ -25,13 +25,13 @@ func Locate(object string) int {
 
 func Add(object string, id int) {
 	mutex.Lock()
-	Objects[object] = id
+	objects[object] = id
 	mutex.Unlock()
 }
 
 func Del(object string) {
 	mutex.Lock()
-	delete(Objects, object)
+	delete(objects, object)
 	mutex.Unlock()
 }
 
@@ -64,6 +64,6 @@ func CollectObjects() {
 		if e != nil {
 			panic(e)
 		}
-		Objects[object] = id
+		objects[object] = id
 	}
 }

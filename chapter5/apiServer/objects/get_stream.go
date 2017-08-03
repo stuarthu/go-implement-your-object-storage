@@ -4,11 +4,10 @@ import (
 	"../heartbeat"
 	"../locate"
 	"fmt"
-	"io"
 	"lib/rs"
 )
 
-func GetStream(object string, size int64) (io.Reader, error) {
+func GetStream(object string, size int64) (*rs.RSGetStream, error) {
 	locateInfo := locate.Locate(object)
 	if len(locateInfo) < rs.DATA_SHARDS {
 		return nil, fmt.Errorf("object %s locate fail, result %v", object, locateInfo)

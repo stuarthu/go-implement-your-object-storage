@@ -11,21 +11,21 @@ import (
 	"strings"
 )
 
-func getObject(name string) string {
+func getFile(name string) string {
 	files, _ := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/objects/" + name + ".*")
 	if len(files) != 1 {
 		return ""
 	}
-	object := files[0]
+	file := files[0]
 	h := sha256.New()
-	sendObject(h, object)
+	sendFile(h, file)
 	d := url.PathEscape(base64.StdEncoding.EncodeToString(h.Sum(nil)))
-	hash := strings.Split(object, ".")[2]
+	hash := strings.Split(file, ".")[2]
 	if d != hash {
-		log.Println("object hash mismatch, remove", object)
-		locate.Del(name)
-		os.Remove(object)
+		log.Println("object hash mismatch, remove", file)
+		locate.Del(hash)
+		os.Remove(file)
 		return ""
 	}
-	return object
+	return file
 }

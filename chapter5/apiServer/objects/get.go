@@ -2,6 +2,7 @@ package objects
 
 import (
 	"io"
+	"lib/es"
 	"log"
 	"net/http"
 	"net/url"
@@ -12,7 +13,7 @@ import (
 func get(w http.ResponseWriter, r *http.Request) {
 	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 	versionId := r.URL.Query()["version"]
-	version := -1
+	version := 0
 	var e error
 	if len(versionId) != 0 {
 		version, e = strconv.Atoi(versionId[0])
@@ -22,7 +23,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	meta, e := getMetaData(name, version)
+	meta, e := es.GetMetadata(name, version)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -40,4 +41,5 @@ func get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	io.Copy(w, stream)
+	stream.Close()
 }
