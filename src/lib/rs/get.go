@@ -11,37 +11,33 @@ type RSGetStream struct {
 	dec     *decoder
 }
 
-func NewRSGetStream(locateInfo map[int]string, dataServers []string, object string, size int64) (*RSGetStream, error) {
+func NewRSGetStream(locateInfo map[int]string, dataServers []string, hash string, size int64) (*RSGetStream, error) {
 	if len(locateInfo)+len(dataServers) != ALL_SHARDS {
 		return nil, fmt.Errorf("dataServers number mismatch")
 	}
 
 	readers := make([]io.Reader, ALL_SHARDS)
-	writers := make([]io.Writer, ALL_SHARDS)
-	totalReaders := ALL_SHARDS
-	perShard := (size + DATA_SHARDS - 1) / DATA_SHARDS
-	var e error
 	for i := 0; i < ALL_SHARDS; i++ {
 		server := locateInfo[i]
 		if server == "" {
-			readers[i] = nil
-			totalReaders--
-			server = dataServers[0]
+			locateInfo[i] = dataServers[0]
 			dataServers = dataServers[1:]
-			locateInfo[i] = server
-			writers[i], e = objectstream.NewTempPutStream(locateInfo[i], fmt.Sprintf("%s.%d", object, i), perShard)
+			continue
+		}
+		reader, e := objectstream.NewGetStream(server, fmt.Sprintf("%s.%d", hash, i))
+		if e == nil {
+			readers[i] = reader
+		}
+	}
+
+	writers := make([]io.Writer, ALL_SHARDS)
+	perShard := (size + DATA_SHARDS - 1) / DATA_SHARDS
+	var e error
+	for i := range readers {
+		if readers[i] == nil {
+			writers[i], e = objectstream.NewTempPutStream(locateInfo[i], fmt.Sprintf("%s.%d", hash, i), perShard)
 			if e != nil {
 				return nil, e
-			}
-		} else {
-			readers[i], e = objectstream.NewGetStream(server, fmt.Sprintf("%s.%d", object, i))
-			if e != nil {
-				readers[i] = nil
-				totalReaders--
-				writers[i], e = objectstream.NewTempPutStream(locateInfo[i], fmt.Sprintf("%s.%d", object, i), perShard)
-				if e != nil {
-					return nil, e
-				}
 			}
 		}
 	}

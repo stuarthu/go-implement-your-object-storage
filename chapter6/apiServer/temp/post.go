@@ -2,10 +2,10 @@ package temp
 
 import (
 	"../heartbeat"
+	"../objects"
 	"encoding/base64"
 	"encoding/json"
 	"lib/objectstream"
-	"lib/utils"
 	"log"
 	"net/http"
 	"net/url"
@@ -29,7 +29,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	hash := utils.GetHashFromHeader(r)
+	hash := objects.GetHashFromHeader(r)
 	ds := heartbeat.ChooseRandomDataServers(1, nil)
 	if len(ds) != 1 {
 		log.Println("not enough dataServer")

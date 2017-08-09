@@ -13,12 +13,12 @@ import (
 )
 
 func (t *tempInfo) hash() string {
-	s := strings.Split(t.Name, ".")
+	s := strings.Split(t.Hash, ".")
 	return s[0]
 }
 
 func (t *tempInfo) id() int {
-	s := strings.Split(t.Name, ".")
+	s := strings.Split(t.Hash, ".")
 	id, _ := strconv.Atoi(s[1])
 	return id
 }
@@ -30,7 +30,7 @@ func commitTempObject(datFile string, tempinfo *tempInfo) {
 	io.Copy(h, f)
 	d := base64.StdEncoding.EncodeToString(h.Sum(nil))
 	f.Seek(0, 0)
-	w, _ := os.Create(os.Getenv("STORAGE_ROOT") + "/objects/" + tempinfo.Name + "." + url.PathEscape(d))
+	w, _ := os.Create(os.Getenv("STORAGE_ROOT") + "/objects/" + tempinfo.Hash + "." + url.PathEscape(d))
 	w2 := gzip.NewWriter(w)
 	io.Copy(w2, f)
 	w2.Close()

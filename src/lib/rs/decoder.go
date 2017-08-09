@@ -10,7 +10,6 @@ type decoder struct {
 	writers   []io.Writer
 	enc       reedsolomon.Encoder
 	size      int64
-	more      bool
 	cache     []byte
 	cacheSize int
 	total     int64
@@ -18,7 +17,7 @@ type decoder struct {
 
 func NewDecoder(readers []io.Reader, writers []io.Writer, size int64) *decoder {
 	enc, _ := reedsolomon.New(DATA_SHARDS, PARITY_SHARDS)
-	return &decoder{readers, writers, enc, size, true, nil, 0, 0}
+	return &decoder{readers, writers, enc, size, nil, 0, 0}
 }
 
 func (d *decoder) Read(p []byte) (n int, err error) {
@@ -46,7 +45,6 @@ func (d *decoder) getData() error {
 	repairIds := make([]int, 0)
 	for i := range shards {
 		if d.readers[i] == nil {
-			shards[i] = nil
 			repairIds = append(repairIds, i)
 		} else {
 			shards[i] = make([]byte, BLOCK_PER_SHARD)

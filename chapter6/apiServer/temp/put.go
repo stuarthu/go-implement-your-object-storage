@@ -2,8 +2,8 @@ package temp
 
 import (
 	"../objects"
+    "lib/es"
 	"lib/objectstream"
-	"lib/utils"
 	"log"
 	"net/http"
 	"strings"
@@ -35,7 +35,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(c)
 		return
 	}
-	e = utils.AddVersion(t.Name, t.Hash, t.Size)
+	e = es.AddVersion(t.Name, t.Hash, t.Size)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)

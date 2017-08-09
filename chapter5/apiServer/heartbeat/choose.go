@@ -18,12 +18,13 @@ func ChooseRandomDataServers(n int, exclude map[int]string) (ds []string) {
 			candidates = append(candidates, s)
 		}
 	}
-	if len(candidates) < n {
+	length := len(candidates)
+	if length < n {
 		return
 	}
-	p := rand.Perm(n)
-	for i := range p {
-		ds = append(ds, candidates[i])
+	p := rand.Perm(length)
+	for i := 0; i < n; i++ {
+		ds = append(ds, candidates[p[i]])
 	}
 	return
 }

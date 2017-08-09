@@ -31,5 +31,5 @@ func Locate(name string) (locateInfo map[int]string) {
 }
 
 func Exist(name string) bool {
-	return len(Locate(name)) != 0
+	return len(Locate(name)) >= rs.DATA_SHARDS
 }

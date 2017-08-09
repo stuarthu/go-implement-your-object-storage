@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-func sendObject(w io.Writer, object string) {
-	f, e := os.Open(object)
+func sendFile(w io.Writer, file string) {
+	f, e := os.Open(file)
 	if e != nil {
 		log.Println(e)
 		return

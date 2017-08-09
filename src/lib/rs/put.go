@@ -7,14 +7,11 @@ import (
 )
 
 type RSPutStream struct {
-	dataServers []string
-	object      string
-	size        int64
-	writers     []io.Writer
-	enc         *encoder
+	writers []io.Writer
+	enc     *encoder
 }
 
-func NewRSPutStream(dataServers []string, object string, size int64) (*RSPutStream, error) {
+func NewRSPutStream(dataServers []string, hash string, size int64) (*RSPutStream, error) {
 	if len(dataServers) != ALL_SHARDS {
 		return nil, fmt.Errorf("dataServers number mismatch")
 	}
@@ -24,14 +21,14 @@ func NewRSPutStream(dataServers []string, object string, size int64) (*RSPutStre
 	var e error
 	for i := range writers {
 		writers[i], e = objectstream.NewTempPutStream(dataServers[i],
-			fmt.Sprintf("%s.%d", object, i), perShard)
+			fmt.Sprintf("%s.%d", hash, i), perShard)
 		if e != nil {
 			return nil, e
 		}
 	}
 	enc := NewEncoder(writers)
 
-	return &RSPutStream{dataServers, object, perShard, writers, enc}, nil
+	return &RSPutStream{writers, enc}, nil
 }
 
 func (s *RSPutStream) Write(p []byte) (int, error) {

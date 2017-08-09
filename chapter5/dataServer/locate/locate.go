@@ -13,9 +13,9 @@ import (
 var objects = make(map[string]int)
 var mutex sync.Mutex
 
-func Locate(object string) int {
+func Locate(hash string) int {
 	mutex.Lock()
-	id, ok := objects[object]
+	id, ok := objects[hash]
 	mutex.Unlock()
 	if !ok {
 		return -1
@@ -23,15 +23,15 @@ func Locate(object string) int {
 	return id
 }
 
-func Add(object string, id int) {
+func Add(hash string, id int) {
 	mutex.Lock()
-	objects[object] = id
+	objects[hash] = id
 	mutex.Unlock()
 }
 
-func Del(object string) {
+func Del(hash string) {
 	mutex.Lock()
-	delete(objects, object)
+	delete(objects, hash)
 	mutex.Unlock()
 }
 
@@ -41,11 +41,11 @@ func StartLocate() {
 	q.Bind("dataServers")
 	c := q.Consume()
 	for msg := range c {
-		object, e := strconv.Unquote(string(msg.Body))
+		hash, e := strconv.Unquote(string(msg.Body))
 		if e != nil {
 			panic(e)
 		}
-		id := Locate(object)
+		id := Locate(hash)
 		if id != -1 {
 			q.Send(msg.ReplyTo, types.LocateMessage{Addr: os.Getenv("LISTEN_ADDRESS"), Id: id})
 		}
@@ -59,11 +59,11 @@ func CollectObjects() {
 		if len(file) != 3 {
 			panic(files[i])
 		}
-		object := file[0]
+		hash := file[0]
 		id, e := strconv.Atoi(file[1])
 		if e != nil {
 			panic(e)
 		}
-		objects[object] = id
+		objects[hash] = id
 	}
 }
