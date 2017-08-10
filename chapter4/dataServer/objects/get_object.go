@@ -2,8 +2,7 @@ package objects
 
 import (
 	"../locate"
-	"crypto/sha256"
-	"encoding/base64"
+	"lib/utils"
 	"log"
 	"net/url"
 	"os"
@@ -11,9 +10,9 @@ import (
 
 func getFile(hash string) string {
 	file := os.Getenv("STORAGE_ROOT") + "/objects/" + hash
-	h := sha256.New()
-	sendFile(h, file)
-	d := url.PathEscape(base64.StdEncoding.EncodeToString(h.Sum(nil)))
+	f, _ := os.Open(file)
+	d := url.PathEscape(utils.CalculateHash(f))
+	f.Close()
 	if d != hash {
 		log.Println("object hash mismatch, remove", file)
 		locate.Del(hash)

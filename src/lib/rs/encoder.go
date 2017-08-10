@@ -39,7 +39,3 @@ func (e *encoder) flush() {
 	e.cache = []byte{}
 	e.cacheSize = 0
 }
-
-func (e *encoder) Close() {
-	e.flush()
-}

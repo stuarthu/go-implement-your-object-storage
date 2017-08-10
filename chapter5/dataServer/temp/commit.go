@@ -2,9 +2,7 @@ package temp
 
 import (
 	"../locate"
-	"crypto/sha256"
-	"encoding/base64"
-	"io"
+	"lib/utils"
 	"net/url"
 	"os"
 	"strconv"
@@ -24,10 +22,8 @@ func (t *tempInfo) id() int {
 
 func commitTempObject(datFile string, tempinfo *tempInfo) {
 	f, _ := os.Open(datFile)
-	defer f.Close()
-	h := sha256.New()
-	io.Copy(h, f)
-	d := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	os.Rename(datFile, os.Getenv("STORAGE_ROOT")+"/objects/"+tempinfo.Hash+"."+url.PathEscape(d))
+	d := url.PathEscape(utils.CalculateHash(f))
+	f.Close()
+	os.Rename(datFile, os.Getenv("STORAGE_ROOT")+"/objects/"+tempinfo.Hash+"."+d)
 	locate.Add(tempinfo.hash(), tempinfo.id())
 }

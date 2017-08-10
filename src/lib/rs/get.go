@@ -7,8 +7,7 @@ import (
 )
 
 type RSGetStream struct {
-	writers []io.Writer
-	dec     *decoder
+	*decoder
 }
 
 func NewRSGetStream(locateInfo map[int]string, dataServers []string, hash string, size int64) (*RSGetStream, error) {
@@ -43,11 +42,7 @@ func NewRSGetStream(locateInfo map[int]string, dataServers []string, hash string
 	}
 
 	dec := NewDecoder(readers, writers, size)
-	return &RSGetStream{writers, dec}, nil
-}
-
-func (s *RSGetStream) Read(p []byte) (n int, err error) {
-	return s.dec.Read(p)
+	return &RSGetStream{dec}, nil
 }
 
 func (s *RSGetStream) Close() {

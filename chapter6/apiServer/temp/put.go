@@ -1,43 +1,77 @@
 package temp
 
 import (
-	"../objects"
-    "lib/es"
-	"lib/objectstream"
+	"../locate"
+	"io"
+	"lib/es"
+	"lib/rs"
+	"lib/utils"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
 func put(w http.ResponseWriter, r *http.Request) {
 	s := strings.Split(r.URL.EscapedPath(), "/")[2]
-	t, e := tokenFromString(s)
+	stream, e := rs.NewRSResumablePutStreamFromToken(s)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	tempPutStream := &objectstream.TempPutStream{t.Server, t.Uuid}
-	defer tempPutStream.Commit(false)
-	tempGetStream, e := tempPutStream.NewTempGetStream()
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusForbidden)
+	current := stream.CurrentSize()
+	if current == -1 {
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	c, e := objects.StoreObject(tempGetStream, t.Hash, t.Size)
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(c)
+	offset := utils.GetOffsetFromHeader(r.Header)
+	if current != offset {
+		w.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
 		return
 	}
-	if c != http.StatusOK {
-		w.WriteHeader(c)
-		return
-	}
-	e = es.AddVersion(t.Name, t.Hash, t.Size)
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
+	bytes := make([]byte, rs.BLOCK_SIZE)
+	for {
+		n, e := io.ReadFull(r.Body, bytes)
+		if e != nil && e != io.EOF && e != io.ErrUnexpectedEOF {
+			log.Println(e)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		current += int64(n)
+		if current > stream.Size {
+			stream.Commit(false)
+			log.Println("resumable put exceed size")
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		log.Println(current)
+		if n != rs.BLOCK_SIZE && current != stream.Size {
+			return
+		}
+		stream.Write(bytes[:n])
+		if current == stream.Size {
+			stream.Close()
+			getStream, e := rs.NewRSResumableGetStream(stream.Servers, stream.Uuids, stream.Size)
+			hash := utils.CalculateHash(getStream)
+			if hash != stream.Hash {
+				stream.Commit(false)
+				log.Println(hash, stream.Hash)
+				log.Println("resumable put done but hash mismatch")
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
+			if locate.Exist(url.PathEscape(hash)) {
+				stream.Commit(false)
+			} else {
+				stream.Commit(true)
+			}
+			e = es.AddVersion(stream.Name, stream.Hash, stream.Size)
+			if e != nil {
+				log.Println(e)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			return
+		}
 	}
 }

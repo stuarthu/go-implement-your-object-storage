@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func StoreObject(r io.Reader, object string) (int, error) {
+func storeObject(r io.Reader, object string) (int, error) {
 	stream, e := putStream(object)
 	if e != nil {
 		return http.StatusServiceUnavailable, e

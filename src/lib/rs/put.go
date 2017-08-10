@@ -7,8 +7,7 @@ import (
 )
 
 type RSPutStream struct {
-	writers []io.Writer
-	enc     *encoder
+	*encoder
 }
 
 func NewRSPutStream(dataServers []string, hash string, size int64) (*RSPutStream, error) {
@@ -28,15 +27,11 @@ func NewRSPutStream(dataServers []string, hash string, size int64) (*RSPutStream
 	}
 	enc := NewEncoder(writers)
 
-	return &RSPutStream{writers, enc}, nil
-}
-
-func (s *RSPutStream) Write(p []byte) (int, error) {
-	return s.enc.Write(p)
+	return &RSPutStream{enc}, nil
 }
 
 func (s *RSPutStream) Commit(success bool) {
-	s.enc.Close()
+	s.flush()
 	for i := range s.writers {
 		s.writers[i].(*objectstream.TempPutStream).Commit(success)
 	}

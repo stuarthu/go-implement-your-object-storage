@@ -4,6 +4,10 @@ import "net/http"
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	m := r.Method
+	if m == http.MethodHead {
+		head(w, r)
+		return
+	}
 	if m == http.MethodGet {
 		get(w, r)
 		return

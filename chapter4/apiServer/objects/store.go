@@ -2,15 +2,14 @@ package objects
 
 import (
 	"../locate"
-	"crypto/sha256"
-	"encoding/base64"
 	"fmt"
 	"io"
+	"lib/utils"
 	"net/http"
 	"net/url"
 )
 
-func StoreObject(r io.Reader, hash string, size int64) (int, error) {
+func storeObject(r io.Reader, hash string, size int64) (int, error) {
 	if locate.Exist(url.PathEscape(hash)) {
 		return http.StatusOK, nil
 	}
@@ -20,14 +19,11 @@ func StoreObject(r io.Reader, hash string, size int64) (int, error) {
 		return http.StatusInternalServerError, e
 	}
 
-	h := sha256.New()
-	reader := io.TeeReader(r, h)
-	io.Copy(stream, reader)
-
-	digest := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	if digest != hash {
+	reader := io.TeeReader(r, stream)
+	d := utils.CalculateHash(reader)
+	if d != hash {
 		stream.Commit(false)
-		return http.StatusBadRequest, fmt.Errorf("object hash mismatch, calculated=%s, requested=%s", digest, hash)
+		return http.StatusBadRequest, fmt.Errorf("object hash mismatch, calculated=%s, requested=%s", d, hash)
 	}
 	stream.Commit(true)
 	return http.StatusOK, nil
