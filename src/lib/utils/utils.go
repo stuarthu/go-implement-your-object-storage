@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,7 +11,6 @@ import (
 
 func GetOffsetFromHeader(h http.Header) int64 {
 	byteRange := h.Get("range")
-	log.Println(byteRange)
 	if len(byteRange) < 7 {
 		return 0
 	}
@@ -21,7 +19,6 @@ func GetOffsetFromHeader(h http.Header) int64 {
 	}
 	bytePos := strings.Split(byteRange[6:], "-")
 	offset, _ := strconv.ParseInt(bytePos[0], 0, 64)
-	log.Println(offset)
 	return offset
 }
 

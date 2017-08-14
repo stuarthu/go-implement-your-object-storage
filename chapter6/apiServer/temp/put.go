@@ -13,8 +13,8 @@ import (
 )
 
 func put(w http.ResponseWriter, r *http.Request) {
-	s := strings.Split(r.URL.EscapedPath(), "/")[2]
-	stream, e := rs.NewRSResumablePutStreamFromToken(s)
+	token := strings.Split(r.URL.EscapedPath(), "/")[2]
+	stream, e := rs.NewRSResumablePutStreamFromToken(token)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusForbidden)
@@ -45,18 +45,16 @@ func put(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		log.Println(current)
 		if n != rs.BLOCK_SIZE && current != stream.Size {
 			return
 		}
 		stream.Write(bytes[:n])
 		if current == stream.Size {
-			stream.Close()
+			stream.Flush()
 			getStream, e := rs.NewRSResumableGetStream(stream.Servers, stream.Uuids, stream.Size)
 			hash := utils.CalculateHash(getStream)
 			if hash != stream.Hash {
 				stream.Commit(false)
-				log.Println(hash, stream.Hash)
 				log.Println("resumable put done but hash mismatch")
 				w.WriteHeader(http.StatusForbidden)
 				return

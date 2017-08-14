@@ -9,8 +9,8 @@ import (
 )
 
 func head(w http.ResponseWriter, r *http.Request) {
-	s := strings.Split(r.URL.EscapedPath(), "/")[2]
-	stream, e := rs.NewRSResumablePutStreamFromToken(s)
+	token := strings.Split(r.URL.EscapedPath(), "/")[2]
+	stream, e := rs.NewRSResumablePutStreamFromToken(token)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusForbidden)

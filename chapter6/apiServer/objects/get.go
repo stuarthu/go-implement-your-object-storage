@@ -44,14 +44,8 @@ func get(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := utils.GetOffsetFromHeader(r.Header)
 	if offset != 0 {
+		stream.Seek(offset, io.SeekCurrent)
 		w.Header().Set("content-range", fmt.Sprintf("bytes %d-%d/%d", offset, meta.Size-1, meta.Size))
-		waste := make([]byte, offset)
-		_, e := io.ReadFull(stream, waste)
-		if e != nil {
-			log.Println(e)
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
 		w.WriteHeader(http.StatusPartialContent)
 	}
 	io.Copy(w, stream)

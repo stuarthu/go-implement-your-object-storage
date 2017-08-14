@@ -12,21 +12,21 @@ import (
 
 type tempInfo struct {
 	Uuid string
-	Hash string
+	Name string
 	Size int64
 }
 
 func post(w http.ResponseWriter, r *http.Request) {
 	output, _ := exec.Command("uuidgen").Output()
 	uuid := strings.TrimSuffix(string(output), "\n")
-	hash := strings.Split(r.URL.EscapedPath(), "/")[2]
+	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 	size, e := strconv.ParseInt(r.Header.Get("size"), 0, 64)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	t := tempInfo{uuid, hash, size}
+	t := tempInfo{uuid, name, size}
 	e = t.writeToFile()
 	if e != nil {
 		log.Println(e)
