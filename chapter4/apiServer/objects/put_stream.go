@@ -13,5 +13,5 @@ func putStream(hash string, size int64) (*objectstream.TempPutStream, error) {
 		return nil, fmt.Errorf("cannot find any dataServer")
 	}
 
-	return objectstream.NewTempPutStream(server, url.PathEscape(hash), size)
+	return objectstream.NewTempPutStream(server, hash, size)
 }

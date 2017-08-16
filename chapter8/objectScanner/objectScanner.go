@@ -1,44 +1,26 @@
 package main
 
 import (
-	"../apiServer/heartbeat"
 	"../apiServer/objects"
-	"bufio"
-	"crypto/sha256"
-	"encoding/base64"
-	"io"
 	"lib/es"
+	"lib/utils"
 	"log"
-	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
-	"time"
 )
 
 func main() {
-	go heartbeat.ListenHeartbeat()
-	time.Sleep(6 * time.Second)
+	files, _ := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/objects/*")
 
-	for dataServer, _ := range heartbeat.DataServers {
-		url := "http://" + dataServer + "/objects/"
-		r, e := http.Get(url)
-		if e != nil {
-			log.Println(e)
-			return
-		}
-		scanner := bufio.NewScanner(r.Body)
-		for scanner.Scan() {
-			object := scanner.Text()
-			tmp := strings.Split(object, ".")
-			hash := tmp[0]
-			id := tmp[1]
-			if id == "0" {
-				verify(hash)
-			}
-		}
+	for i := range files {
+		hash := strings.Split(filepath.Base(files[i]), ".")[0]
+		verify(hash)
 	}
 }
 
 func verify(hash string) {
+	log.Println("verify", hash)
 	size, e := es.SearchHashSize(hash)
 	if e != nil {
 		log.Println(e)
@@ -49,10 +31,9 @@ func verify(hash string) {
 		log.Println(e)
 		return
 	}
-	h := sha256.New()
-	io.Copy(h, stream)
-	d := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	d := utils.CalculateHash(stream)
 	if d != hash {
 		log.Printf("object hash mismatch, calculated=%s, requested=%s", d, hash)
 	}
+	stream.Close()
 }

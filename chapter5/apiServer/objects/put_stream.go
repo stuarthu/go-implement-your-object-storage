@@ -4,7 +4,6 @@ import (
 	"../heartbeat"
 	"fmt"
 	"lib/rs"
-	"net/url"
 )
 
 func putStream(hash string, size int64) (*rs.RSPutStream, error) {
@@ -13,5 +12,5 @@ func putStream(hash string, size int64) (*rs.RSPutStream, error) {
 		return nil, fmt.Errorf("cannot find enough dataServer")
 	}
 
-	return rs.NewRSPutStream(servers, url.PathEscape(hash), size)
+	return rs.NewRSPutStream(servers, hash, size)
 }

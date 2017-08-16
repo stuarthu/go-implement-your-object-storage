@@ -34,7 +34,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 	os.Remove(infoFile)
 	if actual != tempinfo.Size {
 		os.Remove(datFile)
-		log.Println("actual size mismatch")
+		log.Println("actual size mismatch, expect", tempinfo.Size, "actual", actual)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

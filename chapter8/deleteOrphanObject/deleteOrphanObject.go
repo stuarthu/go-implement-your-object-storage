@@ -1,45 +1,35 @@
 package main
 
 import (
-	"../apiServer/heartbeat"
-	"bufio"
 	"lib/es"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
-	"time"
 )
 
 func main() {
-	go heartbeat.ListenHeartbeat()
-	time.Sleep(6 * time.Second)
+	files, _ := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/objects/*")
 
-	for dataServer, _ := range heartbeat.DataServers {
-		url := "http://" + dataServer + "/objects/"
-		r, e := http.Get(url)
+	for i := range files {
+		name := filepath.Base(files[i])
+		hash := strings.Split(name, ".")[0]
+		hashInMetadata, e := es.HasHash(hash)
 		if e != nil {
 			log.Println(e)
 			return
 		}
-		scanner := bufio.NewScanner(r.Body)
-		for scanner.Scan() {
-			object := scanner.Text()
-			hash := strings.Split(object, ".")[0]
-			objectInMetadata, e := es.HasObject(hash)
-			if e != nil {
-				log.Println(e)
-				return
-			}
-			if !objectInMetadata {
-				del(dataServer, object)
-			}
+		log.Println(hash)
+		if !hashInMetadata {
+			del(hash)
 		}
 	}
 }
 
-func del(server, object string) {
-	log.Println("delete", object, "from", server)
-	url := "http://" + server + "/objects/" + object
+func del(hash string) {
+	log.Println("delete", hash)
+	url := "http://" + os.Getenv("LISTEN_ADDRESS") + "/objects/" + hash
 	request, _ := http.NewRequest("DELETE", url, nil)
 	client := http.Client{}
 	client.Do(request)

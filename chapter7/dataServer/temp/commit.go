@@ -3,9 +3,8 @@ package temp
 import (
 	"../locate"
 	"compress/gzip"
-	"crypto/sha256"
-	"encoding/base64"
 	"io"
+	"lib/utils"
 	"net/url"
 	"os"
 	"strconv"
@@ -13,12 +12,12 @@ import (
 )
 
 func (t *tempInfo) hash() string {
-	s := strings.Split(t.Hash, ".")
+	s := strings.Split(t.Name, ".")
 	return s[0]
 }
 
 func (t *tempInfo) id() int {
-	s := strings.Split(t.Hash, ".")
+	s := strings.Split(t.Name, ".")
 	id, _ := strconv.Atoi(s[1])
 	return id
 }
@@ -26,11 +25,9 @@ func (t *tempInfo) id() int {
 func commitTempObject(datFile string, tempinfo *tempInfo) {
 	f, _ := os.Open(datFile)
 	defer f.Close()
-	h := sha256.New()
-	io.Copy(h, f)
-	d := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	f.Seek(0, 0)
-	w, _ := os.Create(os.Getenv("STORAGE_ROOT") + "/objects/" + tempinfo.Hash + "." + url.PathEscape(d))
+	d := url.PathEscape(utils.CalculateHash(f))
+	f.Seek(0, io.SeekStart)
+	w, _ := os.Create(os.Getenv("STORAGE_ROOT") + "/objects/" + tempinfo.Name + "." + d)
 	w2 := gzip.NewWriter(w)
 	io.Copy(w2, f)
 	w2.Close()

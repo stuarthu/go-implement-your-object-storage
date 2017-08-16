@@ -1,7 +1,6 @@
 package rs
 
 import (
-	"fmt"
 	"github.com/klauspost/reedsolomon"
 	"io"
 )
@@ -19,15 +18,20 @@ func NewEncoder(writers []io.Writer) *encoder {
 
 func (e *encoder) Write(p []byte) (n int, err error) {
 	length := len(p)
-	cacheSize := len(e.cache)
-	if cacheSize+length < BLOCK_SIZE {
-		e.cache = append(e.cache, p...)
-		return length, nil
+	current := 0
+	for length != 0 {
+		next := BLOCK_SIZE - len(e.cache)
+		if next > length {
+			next = length
+		}
+		e.cache = append(e.cache, p[current:current+next]...)
+		if len(e.cache) == BLOCK_SIZE {
+			e.Flush()
+		}
+		current += next
+		length -= next
 	}
-	length = BLOCK_SIZE - cacheSize
-	e.cache = append(e.cache, p[:length]...)
-	e.Flush()
-	return length, nil
+	return len(p), nil
 }
 
 func (e *encoder) Flush() {
