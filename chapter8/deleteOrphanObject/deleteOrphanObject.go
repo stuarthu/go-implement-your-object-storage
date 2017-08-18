@@ -13,14 +13,12 @@ func main() {
 	files, _ := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/objects/*")
 
 	for i := range files {
-		name := filepath.Base(files[i])
-		hash := strings.Split(name, ".")[0]
+		hash := strings.Split(filepath.Base(files[i]), ".")[0]
 		hashInMetadata, e := es.HasHash(hash)
 		if e != nil {
 			log.Println(e)
 			return
 		}
-		log.Println(hash)
 		if !hashInMetadata {
 			del(hash)
 		}

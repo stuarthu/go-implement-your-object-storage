@@ -176,8 +176,8 @@ func SearchVersionStatus(min_doc_count int) ([]Bucket, error) {
 	return ar.Aggregations.Group_by_name.Buckets, nil
 }
 
-func HasHash(object string) (bool, error) {
-	url := fmt.Sprintf("http://%s/metadata/_search?q=hash:%s&size=0", os.Getenv("ES_SERVER"), object)
+func HasHash(hash string) (bool, error) {
+	url := fmt.Sprintf("http://%s/metadata/_search?q=hash:%s&size=0", os.Getenv("ES_SERVER"), hash)
 	r, e := http.Get(url)
 	if e != nil {
 		return false, e
