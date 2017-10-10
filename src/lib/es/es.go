@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -45,7 +46,7 @@ func getMetadata(name string, versionId int) (meta Metadata, e error) {
 
 func SearchLatestVersion(name string) (meta Metadata, e error) {
 	url := fmt.Sprintf("http://%s/metadata/_search?q=name:%s&size=1&sort=version:desc",
-		os.Getenv("ES_SERVER"), name)
+		os.Getenv("ES_SERVER"), url.PathEscape(name))
 	r, e := http.Get(url)
 	if e != nil {
 		return

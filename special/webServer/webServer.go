@@ -12,12 +12,14 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
 func main() {
-	http.HandleFunc("/", webHandler)
+	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/upload", uploadHandler)
+	http.HandleFunc("/download", downloadHandler)
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
@@ -28,8 +30,8 @@ type Metadata struct {
 	Hash    string
 }
 
-func webHandler(w http.ResponseWriter, r *http.Request) {
-	req, e := http.Get("http://10.29.2.11:12345/versions/")
+func listHandler(w http.ResponseWriter, r *http.Request) {
+	req, e := http.Get("http://" + os.Getenv("API_SERVER") + "/versions/")
 	if e != nil {
 		log.Println(e)
 		return
@@ -42,7 +44,7 @@ func webHandler(w http.ResponseWriter, r *http.Request) {
 		json.Unmarshal([]byte(s.Text()), &meta)
 		if meta.Hash != "" {
 			n, _ := url.PathUnescape(meta.Name)
-			l := fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td></tr>", n, meta.Version, meta.Size)
+			l := fmt.Sprintf("<tr><td><a href=/download?name=%s&version=%d>%s</a></td><td>%d</td><td>%d</td></tr>", url.PathEscape(n), meta.Version, n, meta.Version, meta.Size)
 			w.Write([]byte(l))
 		}
 	}
@@ -68,7 +70,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(d)
 	f.Seek(0, 0)
 	dat, _ := ioutil.ReadAll(f)
-	req, e := http.NewRequest("PUT", "http://10.29.2.11:12345/objects/"+url.PathEscape(header.Filename), bytes.NewBuffer(dat))
+	req, e := http.NewRequest("PUT", "http://"+os.Getenv("API_SERVER")+"/objects/"+url.PathEscape(header.Filename), bytes.NewBuffer(dat))
 	if e != nil {
 		log.Println(e)
 		return
@@ -84,4 +86,14 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("uploaded")
 	time.Sleep(time.Second)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	req, e := http.Get("http://" + os.Getenv("API_SERVER") + "/objects/" + url.PathEscape(r.URL.Query()["name"][0]) + "?version=" + r.URL.Query()["version"][0])
+	if e != nil {
+		log.Println(e)
+		return
+	}
+	w.Header().Set("content-disposition", "attachment;filename="+r.URL.Query()["name"][0])
+	io.Copy(w, req.Body)
 }
