@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export RABBITMQ_SERVER=amqp://test:test@10.29.102.173:5672
-export ES_SERVER=10.29.102.173:9200
+export RABBITMQ_SERVER=amqp://test:test@localhost:5672
+export ES_SERVER=localhost:9200
 
 LISTEN_ADDRESS=10.29.1.1:12345 STORAGE_ROOT=/tmp/1 go run $1/dataServer/dataServer.go &
 LISTEN_ADDRESS=10.29.1.2:12345 STORAGE_ROOT=/tmp/2 go run $1/dataServer/dataServer.go &
