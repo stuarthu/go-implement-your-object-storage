@@ -4,7 +4,6 @@ import (
 	"../heartbeat"
 	"fmt"
 	"lib/objectstream"
-	"net/url"
 )
 
 func putStream(hash string, size int64) (*objectstream.TempPutStream, error) {
