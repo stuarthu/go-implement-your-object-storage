@@ -52,7 +52,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 		if current == stream.Size {
 			stream.Flush()
 			getStream, e := rs.NewRSResumableGetStream(stream.Servers, stream.Uuids, stream.Size)
-			hash := utils.CalculateHash(getStream)
+			hash := url.PathEscape(utils.CalculateHash(getStream))
 			if hash != stream.Hash {
 				stream.Commit(false)
 				log.Println("resumable put done but hash mismatch")
