@@ -7,6 +7,7 @@ import (
 
 type RabbitMQ struct {
 	channel  *amqp.Channel
+	conn     *amqp.Connection
 	Name     string
 	exchange string
 }
@@ -36,6 +37,7 @@ func New(s string) *RabbitMQ {
 
 	mq := new(RabbitMQ)
 	mq.channel = ch
+	mq.conn = conn
 	mq.Name = q.Name
 	return mq
 }
@@ -106,4 +108,5 @@ func (q *RabbitMQ) Consume() <-chan amqp.Delivery {
 
 func (q *RabbitMQ) Close() {
 	q.channel.Close()
+	q.conn.Close()
 }
